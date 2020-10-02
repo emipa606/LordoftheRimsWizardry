@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  <FactionDef Abstract="True" Name="EntFactionBase">
+    <settlementTexturePath>World/WorldObjects/DefaultFactionBase</settlementTexturePath>
+    <colorSpectrum>
+      <li>(1, 1, 1)</li>
+    </colorSpectrum>
+    <hairTags>
+      <li>Rural</li>
+    </hairTags>
+  </FactionDef>
+  <FactionDef ParentName="EntFactionBase">
+    <defName>WizardPlayerFaction</defName>
+    <label>One Wizard</label>
+    <description>Your own faction.</description>
+    <isPlayer>true</isPlayer>
+    <pawnsPlural>wizards</pawnsPlural>
+    <basicMemberKind>LotRW_WizardColonist</basicMemberKind>
+    <techLevel>Neolithic</techLevel>
+    <backstoryCategories>
+      <li>LotRW_BackstoryWizard</li>
+    </backstoryCategories>
+    <factionIconPath>World/WorldObjects/Expanding/Village</factionIconPath>
+    <settlementTexturePath>World/WorldObjects/TribalSettlement</settlementTexturePath>
+    <playerInitialSettlementNameMaker>NamerInitialSettlementColony</playerInitialSettlementNameMaker>
+    <factionNameMaker>NamerFactionOutlander</factionNameMaker>
+    <settlementNameMaker>NamerSettlementOutlander</settlementNameMaker>
+    <geneticVariance>1</geneticVariance>
+    <startingResearchTags>
+      <li>TribalStart</li>
+    </startingResearchTags>
+  </FactionDef>
+</Defs>

@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  <ThingDef ParentName="BaseBullet">
+    <defName>LotRW_Projectile_RendEarth</defName>
+    <thingClass>Wizardry.Aule_Projectile_RendEarth</thingClass>
+    <label>wizard projectile</label>
+    <graphicData>
+      <texPath>Projectiles/invis</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+    </graphicData>
+    <projectile>
+      <flyOverhead>true</flyOverhead>
+      <damageDef>Stun</damageDef>
+      <damageAmountBase>0</damageAmountBase>
+      <speed>999</speed>
+    </projectile>
+  </ThingDef>
+  <Wizardry.WizardAbilityDef ParentName="BaseWizardAbility">
+    <defName>LotRW_Aule_RendEarth</defName>
+    <label>Rend Earth</label>
+    <uiIconPath>UI/defaultUI</uiIconPath>
+    <description>Rends the earth, causing massive buildings along its path and destroys walls.</description>
+    <MainVerb Class="AbilityUser.VerbProperties_Ability">
+      <verbClass>Wizardry.Verb_BLOS</verbClass>
+      <hasStandardCommand>true</hasStandardCommand>
+      <defaultProjectile>LotRW_Projectile_RendEarth</defaultProjectile>
+      <abilityDef>LotRW_Aule_RendEarth</abilityDef>
+      <isViolent>true</isViolent>
+      <warmupTime>.2</warmupTime>
+      <SecondsToRecharge>5.0</SecondsToRecharge>
+      <range>50</range>
+      <burstShotCount>1</burstShotCount>
+      <ticksBetweenBurstShots>1</ticksBetweenBurstShots>
+      <soundCast>VibrationLow</soundCast>
+      <muzzleFlashScale>20</muzzleFlashScale>
+      <isPrimary>false</isPrimary>
+      <!--       <AbilityTargetCategory>TargetLocation</AbilityTargetCategory> -->
+      <targetParams>
+        <canTargetPawns>true</canTargetPawns>
+        <canTargetBuildings>true</canTargetBuildings>
+        <canTargetItems>false</canTargetItems>
+        <canTargetSelf>false</canTargetSelf>
+        <canTargetLocations>true</canTargetLocations>
+      </targetParams>
+      <tooltipShowProjectileDamage>false</tooltipShowProjectileDamage>
+      <tooltipShowExtraDamages>false</tooltipShowExtraDamages>
+      <tooltipShowHediffsToApply>false</tooltipShowHediffsToApply>
+      <tooltipShowMentalStatesToApply>false</tooltipShowMentalStatesToApply>
+    </MainVerb>
+  </Wizardry.WizardAbilityDef>
+  <!-- Rock Wall -->
+  <ThingDef ParentName="BaseBullet" Class="AbilityUser.ProjectileDef_Ability">
+    <thingClass>Wizardry.Aule_Projectile_RockWall</thingClass>
+    <defName>LotRW_Projectile_RockWall</defName>
+    <label>rock wall</label>
+    <graphicData>
+      <texPath>Projectiles/invis</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+    </graphicData>
+    <projectile>
+      <damageDef>Stun</damageDef>
+      <damageAmountBase>0</damageAmountBase>
+      <speed>999</speed>
+    </projectile>
+  </ThingDef>
+  <Wizardry.WizardAbilityDef ParentName="BaseWizardAbility">
+    <defName>LotRW_Aule_RockWall</defName>
+    <label>Earth Barrier</label>
+    <uiIconPath>UI/defaultUI</uiIconPath>
+    <description>Creates a wall of earth</description>
+    <MainVerb Class="AbilityUser.VerbProperties_Ability">
+      <verbClass>AbilityUser.Verb_UseAbility</verbClass>
+      <tooltipShowProjectileDamage>false</tooltipShowProjectileDamage>
+      <tooltipShowExtraDamages>false</tooltipShowExtraDamages>
+      <tooltipShowHediffsToApply>false</tooltipShowHediffsToApply>
+      <tooltipShowMentalStatesToApply>false</tooltipShowMentalStatesToApply>
+      <hasStandardCommand>true</hasStandardCommand>
+      <defaultProjectile>LotRW_Projectile_RockWall</defaultProjectile>
+      <abilityDef>LotRW_Aule_RockWall</abilityDef>
+      <isViolent>false</isViolent>
+      <warmupTime>.1</warmupTime>
+      <SecondsToRecharge>5.0</SecondsToRecharge>
+      <range>40</range>
+      <ticksBetweenBurstShots>1</ticksBetweenBurstShots>
+      <burstShotCount>1</burstShotCount>
+      <soundCast>VibrationLow</soundCast>
+      <soundCastTail>GunTail_Medium</soundCastTail>
+      <muzzleFlashScale>2</muzzleFlashScale>
+      <AlwaysHits>true</AlwaysHits>
+      <isPrimary>true</isPrimary>
+      <targetParams>
+        <canTargetPawns>false</canTargetPawns>
+        <canTargetBuildings>false</canTargetBuildings>
+        <canTargetSelf>false</canTargetSelf>
+        <canTargetLocations>true</canTargetLocations>
+      </targetParams>
+    </MainVerb>
+  </Wizardry.WizardAbilityDef>
+</Defs>
