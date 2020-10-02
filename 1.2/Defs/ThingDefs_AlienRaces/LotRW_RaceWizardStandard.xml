@@ -45,7 +45,7 @@
               <path>Things/Istard/Istard</path>
               <bodyPart>Head</bodyPart>
               <inFrontOfBody>true</inFrontOfBody>
-              <layerOffset>-0.275</layerOffset>
+              <!-- <layerOffset>-0.275</layerOffset> -->
               <offsets>
                 <south>
                   <bodyTypes>
