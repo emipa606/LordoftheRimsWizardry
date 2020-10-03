@@ -1,0 +1,122 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{3A4FB893-1148-4E16-B548-867647DF1724}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Wizardry</RootNamespace>
+    <AssemblyName>LotR_Wizardry</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>none</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\1.2\Assemblies\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="0Harmony, Version=2.0.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Lib.Harmony.2.0.2\lib\net472\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="AbilityUser">
+      <HintPath>..\..\..\..\..\..\workshop\content\294100\2195729899\1.2\Assemblies\AbilityUser.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.InteropServices.RuntimeInformation" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Mandos_Projectile_Darkness.cs" />
+    <Compile Include="Mandos_FlyingObject_Haunt.cs" />
+    <Compile Include="Libraries\Building_Bookcase.cs" />
+    <Compile Include="Libraries\Building_InternalStorage.cs" />
+    <Compile Include="Libraries\CompProperties_StorageGraphic.cs" />
+    <Compile Include="Libraries\CompStorageGraphic.cs" />
+    <Compile Include="Libraries\Item_JournalPage.cs" />
+    <Compile Include="Libraries\JobDriver_FreeWrite.cs" />
+    <Compile Include="Libraries\JobDriver_ReadABook.cs" />
+    <Compile Include="Libraries\JobDriver_ReturnBook.cs" />
+    <Compile Include="Libraries\JobDriver_Write.cs" />
+    <Compile Include="Libraries\RoomRoleWorker_WizardLibrary.cs" />
+    <Compile Include="Libraries\ThingBook.cs" />
+    <Compile Include="Libraries\WorkGiver_ReturnBooks.cs" />
+    <Compile Include="Mandos_Verb_Doom.cs" />
+    <Compile Include="Nienna_WorkGiver_HealingTouch.cs" />
+    <Compile Include="Mandos_Effect_Haunt.cs" />
+    <Compile Include="Verb_BLOS.cs" />
+    <Compile Include="MeshMaker.cs" />
+    <Compile Include="MatPool.cs" />
+    <Compile Include="Effect_MeshMaker.cs" />
+    <Compile Include="Harmony_LotRW.cs" />
+    <Compile Include="Aule_Projectile_RockWall.cs" />
+    <Compile Include="Nienna_JobDriver_HealingTouch.cs" />
+    <Compile Include="Nienna_Verb_HealingRain.cs" />
+    <Compile Include="Nienna_Verb_HealingTouch.cs" />
+    <Compile Include="Varda_FlyingObject_StreamingFlame.cs" />
+    <Compile Include="LotRW_Building_BlockingTraversable.cs" />
+    <Compile Include="ExplosionUtility.cs" />
+    <Compile Include="FlyingObject_Spinning.cs" />
+    <Compile Include="Manwe_Verb_AirWall.cs" />
+    <Compile Include="Manwe_Projectile_AirWall.cs" />
+    <Compile Include="Projectile_LightChaser.cs" />
+    <Compile Include="JobDriver_StormCalling.cs" />
+    <Compile Include="Manwe_Effect_WindControl.cs" />
+    <Compile Include="Manwe_FlyingObject_WindControl.cs" />
+    <Compile Include="Ulmo_FlyingObject_WolfSong.cs" />
+    <Compile Include="Ulmo_Effect_WolfSong.cs" />
+    <Compile Include="Ulmo_FlyingObject_RainDance.cs" />
+    <Compile Include="EffectMaker.cs" />
+    <Compile Include="PawnAbilityAttunement.cs" />
+    <Compile Include="SpellDefAttunement.cs" />
+    <Compile Include="CompWizardry.cs" />
+    <Compile Include="Ulmo_Effect_RainDance.cs" />
+    <Compile Include="Manwe_Projectile_Vortex.cs" />
+    <Compile Include="Aule_Projectile_RendEarth.cs" />
+    <Compile Include="Verb_StormCalling.cs" />
+    <Compile Include="Ulmo_Verb_FlameSong.cs" />
+    <Compile Include="UtilityWizardry.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Projectile_FlameSong.cs" />
+    <Compile Include="Varda_Projectile_ConeOfFire.cs" />
+    <Compile Include="Varda_Projectile_FocusFlames.cs" />
+    <Compile Include="Varda_Projectile_RainOfFire.cs" />
+    <Compile Include="WizardAbilityDef.cs" />
+    <Compile Include="WizardryDefOf.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
