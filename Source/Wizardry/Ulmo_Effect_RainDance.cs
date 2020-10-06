@@ -24,8 +24,8 @@ namespace Wizardry
                 //base.CasterPawn.rotationTracker.Face(targetCell.ToVector3());
                 LongEventHandler.QueueLongEvent(delegate
                 {
-                    Ulmo_FlyingObject_RainDance flyingObject = (Ulmo_FlyingObject_RainDance)GenSpawn.Spawn(ThingDef.Named("FlyingObject_RainDance"), this.CasterPawn.Position, this.CasterPawn.Map);
-                    flyingObject.Launch(this.CasterPawn, t.Cell, base.CasterPawn);
+                    Ulmo_FlyingObject_RainDance flyingObject = (Ulmo_FlyingObject_RainDance)GenSpawn.Spawn(ThingDef.Named("FlyingObject_RainDance"), CasterPawn.Position, CasterPawn.Map);
+                    flyingObject.Launch(CasterPawn, t.Cell, base.CasterPawn);
                 }, "LaunchingFlyer", false, null);
             }
             else
@@ -38,7 +38,7 @@ namespace Wizardry
         {
             if (inResult)
             {
-                this.Effect();
+                Effect();
                 outResult = true;
             }
             outResult = inResult;

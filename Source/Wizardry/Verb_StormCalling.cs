@@ -27,8 +27,8 @@ namespace Wizardry
             {
                 Messages.Message("unable to call lightning under these weather conditions", MessageTypeDefOf.RejectInput);
             }
-            this.Ability.PostAbilityAttempt();
-            this.burstShotsLeft = 0;
+            Ability.PostAbilityAttempt();
+            burstShotsLeft = 0;
             return false;
         }
     }

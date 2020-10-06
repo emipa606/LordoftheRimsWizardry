@@ -18,16 +18,16 @@ namespace Wizardry
         {
             Map map = base.CasterPawn.Map;
             Pawn pawn = base.CasterPawn;
-            IntVec3 centerCell = this.currentTarget.Cell;
-            this.fireAmount = CalculateFireAmountInArea(centerCell, this.Projectile.projectile.explosionRadius, map);
+            IntVec3 centerCell = currentTarget.Cell;
+            fireAmount = CalculateFireAmountInArea(centerCell, Projectile.projectile.explosionRadius, map);
             if ((centerCell.IsValid && centerCell.InBounds(map)))
             {
                 Thing thing = null;
-                if (this.fireAmount > 8f)
+                if (fireAmount > 8f)
                 {
                     thing = ThingMaker.MakeThing(ThingDef.Named("LotRW_Flamesong_Orb"), null);
                 }
-                else if (this.fireAmount > 1f)
+                else if (fireAmount > 1f)
                 {
                     thing = ThingMaker.MakeThing(ThingDef.Named("LotRW_Flamesong_Orb_Small"), null);
                 }                
@@ -41,8 +41,8 @@ namespace Wizardry
             {
                 Messages.Message("failed to spawn orb of flamesong", MessageTypeDefOf.RejectInput);
             }
-            this.Ability.PostAbilityAttempt();
-            this.burstShotsLeft = 0;
+            Ability.PostAbilityAttempt();
+            burstShotsLeft = 0;
             return false;
         }
 
@@ -73,7 +73,7 @@ namespace Wizardry
 
         public void RemoveFireAtPosition(IntVec3 pos, Map map)
         {
-            GenExplosion.DoExplosion(pos, map, 1, DamageDefOf.Extinguish, this.CasterPawn, 100, 0, SoundDef.Named("ExpandingFlames"), null, null, null, null, 0f, 1, false, null, 0f, 1, 0f, false);
+            GenExplosion.DoExplosion(pos, map, 1, DamageDefOf.Extinguish, CasterPawn, 100, 0, SoundDef.Named("ExpandingFlames"), null, null, null, null, 0f, 1, false, null, 0f, 1, 0f, false);
         }
     }
 }

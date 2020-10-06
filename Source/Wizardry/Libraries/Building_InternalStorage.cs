@@ -40,7 +40,7 @@ namespace Wizardry
         public bool StorageTabVisible => true;
         public Building_InternalStorage()
         {
-            this.innerContainer = new ThingOwner<Thing>(this, false, LookMode.Deep);
+            innerContainer = new ThingOwner<Thing>(this, false, LookMode.Deep);
         }
         
         public bool TryAccept(Thing thing)
@@ -50,11 +50,11 @@ namespace Wizardry
 
         public bool Accepts(Thing thing)
         {
-            if (!this.storageSettings.AllowedToAccept(thing))
+            if (!storageSettings.AllowedToAccept(thing))
             {
                 return false;
             }
-            if (this.innerContainer.Count + 1 > this.CompStorageGraphic.Props.countFullCapacity)
+            if (innerContainer.Count + 1 > CompStorageGraphic.Props.countFullCapacity)
             {
                 return false;
             }
@@ -64,21 +64,21 @@ namespace Wizardry
         public override void PostMake()
         {
             base.PostMake();
-            this.storageSettings = new StorageSettings(this);
-            if (this.def.building.defaultStorageSettings != null)
+            storageSettings = new StorageSettings(this);
+            if (def.building.defaultStorageSettings != null)
             {
-                this.storageSettings.CopyFrom(this.def.building.defaultStorageSettings);
+                storageSettings.CopyFrom(def.building.defaultStorageSettings);
             }
         }
 
         public override void ExposeData()
         {
             base.ExposeData();
-            Scribe_Deep.Look<ThingOwner>(ref this.innerContainer, "innerContainer", new object[]
+            Scribe_Deep.Look<ThingOwner>(ref innerContainer, "innerContainer", new object[]
             {
                             this
             });
-            Scribe_Deep.Look<StorageSettings>(ref this.storageSettings, "storageSettings", new object[]
+            Scribe_Deep.Look<StorageSettings>(ref storageSettings, "storageSettings", new object[]
             {
                 this
             });
@@ -90,9 +90,9 @@ namespace Wizardry
         {
             Thing outThing;
             droppedThing = null;
-            if (this.innerContainer.Count > 0)
+            if (innerContainer.Count > 0)
             {
-                this.innerContainer.TryDrop(this.innerContainer.RandomElement(), ThingPlaceMode.Near, out outThing);
+                innerContainer.TryDrop(innerContainer.RandomElement(), ThingPlaceMode.Near, out outThing);
                 if (forbid) outThing.SetForbidden(true);
                 droppedThing = outThing as ThingBook;
                 return true;
@@ -106,10 +106,10 @@ namespace Wizardry
 
         public bool TryDrop(Thing item, bool forbid = true)
         {
-            if (this.innerContainer.Contains(item))
+            if (innerContainer.Contains(item))
             {
                 Thing outThing;
-                this.innerContainer.TryDrop(item, ThingPlaceMode.Near, out outThing);
+                innerContainer.TryDrop(item, ThingPlaceMode.Near, out outThing);
                 if (forbid) outThing.SetForbidden(true);
                 return true;
             }
@@ -119,22 +119,22 @@ namespace Wizardry
 
         public void GetChildHolders(List<IThingHolder> outChildren)
         {
-            ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, this.GetDirectlyHeldThings());
+            ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, GetDirectlyHeldThings());
         }
 
         public ThingOwner GetDirectlyHeldThings()
         {
-            return this.innerContainer;
+            return innerContainer;
         }
 
         public StorageSettings GetParentStoreSettings()
         {
-            return this.def.building.fixedStorageSettings;
+            return def.building.fixedStorageSettings;
         }
 
         public StorageSettings GetStoreSettings()
         {
-            return this.storageSettings;
+            return storageSettings;
         }
     }
 }

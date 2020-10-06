@@ -21,16 +21,16 @@ namespace Wizardry
         public override void ExposeData()
         {
             base.ExposeData();
-            Scribe_Values.Look<bool>(ref this.initialized, "initialized", true, false);
-            Scribe_Values.Look<int>(ref this.age, "age", -1, false);
-            Scribe_Values.Look<int>(ref this.duration, "duration", 900, false);
-            Scribe_Values.Look<float>(ref this.radius, "radius", 7f, false);
-            Scribe_Collections.Look<IntVec3>(ref this.inDarkness, "inDarkness", LookMode.Value);
+            Scribe_Values.Look<bool>(ref initialized, "initialized", true, false);
+            Scribe_Values.Look<int>(ref age, "age", -1, false);
+            Scribe_Values.Look<int>(ref duration, "duration", 900, false);
+            Scribe_Values.Look<float>(ref radius, "radius", 7f, false);
+            Scribe_Collections.Look<IntVec3>(ref inDarkness, "inDarkness", LookMode.Value);
         }
 
         public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
         {
-            bool flag = this.age < duration;
+            bool flag = age < duration;
             if (!flag)
             {
                 base.Destroy(mode);
@@ -39,19 +39,19 @@ namespace Wizardry
 
         private void Initialize()
         {
-            this.radius = (int)this.def.projectile.explosionRadius;
-            this.inDarkness = GenRadial.RadialCellsAround(base.Position, this.radius, false).ToList();
-            for (int i = 0; i < this.inDarkness.Count(); i++)
+            radius = (int)def.projectile.explosionRadius;
+            inDarkness = GenRadial.RadialCellsAround(Position, radius, false).ToList();
+            for (int i = 0; i < inDarkness.Count(); i++)
             {
-                if (inDarkness[i].IsValid && inDarkness[i].InBounds(base.Map))
+                if (inDarkness[i].IsValid && inDarkness[i].InBounds(Map))
                 {
                     ThingDef darkness = ThingDef.Named("Mandos_BlackSmoke");
-                    GenSpawn.Spawn(darkness, inDarkness[i], base.Map, WipeMode.Vanish);
+                    GenSpawn.Spawn(darkness, inDarkness[i], Map, WipeMode.Vanish);
                     //GenExplosion.DoExplosion(inDarkness[i], base.Map, 1, DamageDefOf.Smoke, this.launcher, -1, -1, null, null, null, null, darkness, 1);
-                    EffectMaker.MakeEffect(ThingDef.Named("Mote_BlackSmoke"), this.inDarkness[i].ToVector3Shifted(), base.Map, Rand.Range(1f, 2f), Rand.Range(0, 360), Rand.Range(.1f, .2f), Rand.Range(-20, 20), this.duration / 240, Rand.Range(.5f, 1.5f), Rand.Range(2f, 3f), true);
+                    EffectMaker.MakeEffect(ThingDef.Named("Mote_BlackSmoke"), inDarkness[i].ToVector3Shifted(), Map, Rand.Range(1f, 2f), Rand.Range(0, 360), Rand.Range(.1f, .2f), Rand.Range(-20, 20), duration / 240, Rand.Range(.5f, 1.5f), Rand.Range(2f, 3f), true);
                     //EffectMaker.MakeEffect(ThingDef.Named("Mote_BlackSmoke"), this.inDarkness[i].ToVector3Shifted(), base.Map, Rand.Range(1f, 2f), Rand.Range(0, 360), Rand.Range(.1f, .2f), Rand.Range(-20, 20), this.duration / 60, Rand.Range(.5f, 1.5f), Rand.Range(2f, 3f), true);
                     Pawn victim = null;
-                    victim = this.inDarkness[i].GetFirstPawn(base.Map);
+                    victim = inDarkness[i].GetFirstPawn(Map);
                     if (victim != null)
                     {
                         HealthUtility.AdjustSeverity(victim, HediffDef.Named("LotRW_DarknessHD"), 1);
@@ -59,10 +59,10 @@ namespace Wizardry
                 }
                 else
                 {
-                    this.inDarkness.Remove(this.inDarkness[i]);
+                    inDarkness.Remove(inDarkness[i]);
                 }
             }
-            this.initialized = true;
+            initialized = true;
         }
 
         protected override void Impact(Thing hitThing)
@@ -73,12 +73,12 @@ namespace Wizardry
                 Initialize();
             }
 
-            if(Find.TickManager.TicksGame % this.hediffFrequency == 0)
+            if(Find.TickManager.TicksGame % hediffFrequency == 0)
             {
-                for(int i = 0; i < this.inDarkness.Count(); i++)
+                for(int i = 0; i < inDarkness.Count(); i++)
                 {
                     Pawn victim = null;
-                    victim = this.inDarkness[i].GetFirstPawn(base.Map);
+                    victim = inDarkness[i].GetFirstPawn(Map);
                     if(victim != null)
                     {
                         HealthUtility.AdjustSeverity(victim, HediffDef.Named("LotRW_DarknessHD"), 1);
@@ -91,7 +91,7 @@ namespace Wizardry
         public override void Tick()
         {
             base.Tick();
-            this.age++;
+            age++;
         }
     }
 }

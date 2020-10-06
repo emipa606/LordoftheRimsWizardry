@@ -13,9 +13,9 @@ namespace Wizardry
     {
         protected override bool TryCastShot()
         {
-            if (this.currentTarget.Thing is Pawn)
+            if (currentTarget.Thing is Pawn)
             {
-                Pawn pawn = this.CasterPawn;
+                Pawn pawn = CasterPawn;
 
                 if (!pawn.DestroyedOrNull() && !pawn.Dead && pawn.RaceProps.IsFlesh)
                 {
@@ -31,8 +31,8 @@ namespace Wizardry
             {
                 Messages.Message("invalid target for healing touch", MessageTypeDefOf.RejectInput);
             }
-            this.Ability.PostAbilityAttempt();
-            this.burstShotsLeft = 0;
+            Ability.PostAbilityAttempt();
+            burstShotsLeft = 0;
             return false;
         }
     }

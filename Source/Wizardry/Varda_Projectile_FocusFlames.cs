@@ -33,20 +33,20 @@ namespace Wizardry
         public override void ExposeData()
         {
             base.ExposeData();
-            Scribe_Values.Look<bool>(ref this.initialized, "initialized", false, false);
-            Scribe_Values.Look<int>(ref this.age, "age", -1, false);
-            Scribe_Values.Look<int>(ref this.strikeInt, "strikeInt", 0, false);
-            Scribe_Values.Look<float>(ref this.fireAmount, "fireAmount", 0, false);
-            Scribe_Values.Look<float>(ref this.distance, "distance", 0, false);
-            Scribe_Values.Look<IntVec3>(ref this.centerCell, "centerCell", default, false);
-            Scribe_Values.Look<Vector3>(ref this.direction, "direction", default, false);
-            Scribe_Values.Look<Vector3>(ref this.directionP, "directionP", default, false);
-            Scribe_Values.Look<Vector3>(ref this.currentPos, "currentPos", default, false);
+            Scribe_Values.Look<bool>(ref initialized, "initialized", false, false);
+            Scribe_Values.Look<int>(ref age, "age", -1, false);
+            Scribe_Values.Look<int>(ref strikeInt, "strikeInt", 0, false);
+            Scribe_Values.Look<float>(ref fireAmount, "fireAmount", 0, false);
+            Scribe_Values.Look<float>(ref distance, "distance", 0, false);
+            Scribe_Values.Look<IntVec3>(ref centerCell, "centerCell", default, false);
+            Scribe_Values.Look<Vector3>(ref direction, "direction", default, false);
+            Scribe_Values.Look<Vector3>(ref directionP, "directionP", default, false);
+            Scribe_Values.Look<Vector3>(ref currentPos, "currentPos", default, false);
         }
 
         public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
         {
-            bool flag = this.age < duration;
+            bool flag = age < duration;
             if (!flag)
             {
                 base.Destroy(mode);
@@ -57,14 +57,14 @@ namespace Wizardry
         {            
             base.Impact(hitThing);
             ThingDef def = this.def;
-            this.caster = this.launcher as Pawn;
+            caster = launcher as Pawn;
             Map map = caster.Map;
             Pawn closestTarget = null;                       
             bool noTarget = false;
 
-            if (!this.initialized)
+            if (!initialized)
             {
-                this.centerCell = base.Position;
+                centerCell = Position;
                 fireAmount = CalculateFireAmountInArea(centerCell, this.def.projectile.explosionRadius);
                 closestTarget = SearchForClosestPawn(centerCell, this.def.projectile.explosionRadius * 5, map);
                 if(closestTarget == null)
@@ -72,23 +72,23 @@ namespace Wizardry
                     closestTarget = caster;
                     noTarget = true;
                 }
-                this.direction = GetVector(closestTarget.Position, noTarget, fireAmount);
-                this.nextStrike = this.age + this.ticksPerStrike;
-                this.currentPos = base.Position.ToVector3();
-                this.distance = Mathf.Min(20f, this.distance);
-                this.initialized = true;
+                direction = GetVector(closestTarget.Position, noTarget, fireAmount);
+                nextStrike = age + ticksPerStrike;
+                currentPos = Position.ToVector3();
+                distance = Mathf.Min(20f, distance);
+                initialized = true;
             }
 
-            if(this.age > this.nextStrike && fireAmount > 0)
+            if(age > nextStrike && fireAmount > 0)
             {
-                this.currentPos += this.direction;
-                this.nextStrike = this.age + this.ticksPerStrike;
+                currentPos += direction;
+                nextStrike = age + ticksPerStrike;
                 if (!(currentPos.ToIntVec3().GetTerrain(map).passability == Traversability.Impassable) && currentPos.ToIntVec3().Walkable(map))
                 {
-                    if (currentPos.ToIntVec3() != base.Position && this.Map != null)
+                    if (currentPos.ToIntVec3() != Position && Map != null)
                     {
-                        EffectMaker.MakeEffect(WizardryDefOf.Mote_ExpandingFlame, currentPos, this.Map, 1f, (Quaternion.AngleAxis(90, Vector3.up) * direction).ToAngleFlat(), 5f, Rand.Range(10, 50));
-                        EffectMaker.MakeEffect(WizardryDefOf.Mote_RecedingFlame, currentPos, this.Map, .8f, (Quaternion.AngleAxis(90, Vector3.up) * direction).ToAngleFlat(), 1f, 0);
+                        EffectMaker.MakeEffect(WizardryDefOf.Mote_ExpandingFlame, currentPos, Map, 1f, (Quaternion.AngleAxis(90, Vector3.up) * direction).ToAngleFlat(), 5f, Rand.Range(10, 50));
+                        EffectMaker.MakeEffect(WizardryDefOf.Mote_RecedingFlame, currentPos, Map, .8f, (Quaternion.AngleAxis(90, Vector3.up) * direction).ToAngleFlat(), 1f, 0);
                         List<Thing> hitList = currentPos.ToIntVec3().GetThingList(map);
                         Thing burnThing = null;
                         for (int j = 0; j < hitList.Count; j++)
@@ -97,54 +97,54 @@ namespace Wizardry
                             DamageEntities(burnThing);
                         }
                         //GenExplosion.DoExplosion(this.currentPos.ToIntVec3(), this.Map, .4f, DamageDefOf.Flame, this.launcher, 10, SoundDefOf.ArtilleryShellLoaded, def, this.equipmentDef, null, 0f, 1, false, null, 0f, 1, 0f, false);
-                        if (Rand.Chance(this.fireStartChance))
+                        if (Rand.Chance(fireStartChance))
                         {
                             FireUtility.TryStartFireIn(currentPos.ToIntVec3(), map, .2f);
                         }
-                        this.fireAmount -= this.mainFlameDropoff;
-                        this.strikeInt++;
-                        Vector3 tempVec1 = this.currentPos;
+                        fireAmount -= mainFlameDropoff;
+                        strikeInt++;
+                        Vector3 tempVec1 = currentPos;
                         IntVec3 lastVec1Pos = default;
-                        Vector3 tempVec2 = this.currentPos;
+                        Vector3 tempVec2 = currentPos;
                         IntVec3 lastVec2Pos = default;
-                        for (float i = strikeInt / Mathf.RoundToInt(this.distance); i > .4f; i-=.6f)
+                        for (float i = strikeInt / Mathf.RoundToInt(distance); i > .4f; i-=.6f)
                         {
-                            tempVec1 += this.directionP;
-                            if (tempVec1.ToIntVec3() != this.currentPos.ToIntVec3() && tempVec1.ToIntVec3() != lastVec1Pos)
+                            tempVec1 += directionP;
+                            if (tempVec1.ToIntVec3() != currentPos.ToIntVec3() && tempVec1.ToIntVec3() != lastVec1Pos)
                             {
                                 lastVec1Pos = tempVec1.ToIntVec3();
-                                EffectMaker.MakeEffect(WizardryDefOf.Mote_ExpandingFlame, tempVec1, this.Map, .8f, (Quaternion.AngleAxis(90, Vector3.up) * direction).ToAngleFlat(), 4f, Rand.Range(10, 50));
-                                EffectMaker.MakeEffect(WizardryDefOf.Mote_RecedingFlame, tempVec1, this.Map, .7f, (Quaternion.AngleAxis(90, Vector3.up) * direction).ToAngleFlat(), 1f, 0);
+                                EffectMaker.MakeEffect(WizardryDefOf.Mote_ExpandingFlame, tempVec1, Map, .8f, (Quaternion.AngleAxis(90, Vector3.up) * direction).ToAngleFlat(), 4f, Rand.Range(10, 50));
+                                EffectMaker.MakeEffect(WizardryDefOf.Mote_RecedingFlame, tempVec1, Map, .7f, (Quaternion.AngleAxis(90, Vector3.up) * direction).ToAngleFlat(), 1f, 0);
                                 hitList = lastVec1Pos.GetThingList(map);
                                 for (int j = 0; j < hitList.Count; j++)
                                 {
                                     burnThing = hitList[j];
                                     DamageEntities(burnThing);
                                 }
-                                if (Rand.Chance(this.fireStartChance))
+                                if (Rand.Chance(fireStartChance))
                                 {
                                     FireUtility.TryStartFireIn(lastVec1Pos, map, .2f);
                                 }
-                                this.fireAmount -= this.branchingFlameDropoff;
+                                fireAmount -= branchingFlameDropoff;
                                 //GenExplosion.DoExplosion(lastVec1Pos, this.Map, .4f, DamageDefOf.Flame, this.launcher, 10, SoundDefOf.ArtilleryShellLoaded, def, this.equipmentDef, null, 0f, 1, false, null, 0f, 1, 0f, false);
                             }
-                            tempVec2 -= this.directionP;
-                            if (tempVec2.ToIntVec3() != this.currentPos.ToIntVec3() && tempVec2.ToIntVec3() != lastVec2Pos)
+                            tempVec2 -= directionP;
+                            if (tempVec2.ToIntVec3() != currentPos.ToIntVec3() && tempVec2.ToIntVec3() != lastVec2Pos)
                             {
                                 lastVec2Pos = tempVec2.ToIntVec3();
-                                EffectMaker.MakeEffect(WizardryDefOf.Mote_ExpandingFlame, tempVec2, this.Map, .8f, (Quaternion.AngleAxis(90, Vector3.up) * direction).ToAngleFlat(), 4f, Rand.Range(10, 50));
-                                EffectMaker.MakeEffect(WizardryDefOf.Mote_RecedingFlame, tempVec2, this.Map, .7f, (Quaternion.AngleAxis(90, Vector3.up) * direction).ToAngleFlat(), 1f, 0);
+                                EffectMaker.MakeEffect(WizardryDefOf.Mote_ExpandingFlame, tempVec2, Map, .8f, (Quaternion.AngleAxis(90, Vector3.up) * direction).ToAngleFlat(), 4f, Rand.Range(10, 50));
+                                EffectMaker.MakeEffect(WizardryDefOf.Mote_RecedingFlame, tempVec2, Map, .7f, (Quaternion.AngleAxis(90, Vector3.up) * direction).ToAngleFlat(), 1f, 0);
                                 hitList = lastVec2Pos.GetThingList(map);
                                 for (int j = 0; j < hitList.Count; j++)
                                 {
                                     burnThing = hitList[j];
                                     DamageEntities(burnThing);
                                 }
-                                if (Rand.Chance(this.fireStartChance))
+                                if (Rand.Chance(fireStartChance))
                                 {
                                     FireUtility.TryStartFireIn(lastVec1Pos, map, .2f);
                                 }
-                                this.fireAmount -= this.branchingFlameDropoff;
+                                fireAmount -= branchingFlameDropoff;
                                 //GenExplosion.DoExplosion(lastVec2Pos, this.Map, .4f, DamageDefOf.Flame, this.launcher, 10, SoundDefOf.ArtilleryShellLoaded, def, this.equipmentDef, null, 0f, 1, false, null, 0f, 1, 0f, false);
                             }
                         }
@@ -152,21 +152,21 @@ namespace Wizardry
                 }
                 else
                 {
-                    this.age = this.duration;
+                    age = duration;
                 }
             }
         }
 
         public Vector3 GetVector(IntVec3 closestTarget, bool reverseDirection, float magnitude)
         {
-            Vector3 heading = (closestTarget - base.Position).ToVector3();
+            Vector3 heading = (closestTarget - Position).ToVector3();
             if(reverseDirection)
             {
                 heading = Quaternion.AngleAxis(180, Vector3.up) * heading;
             }
-            this.distance = heading.magnitude;
+            distance = heading.magnitude;
             Vector3 dirVec = heading / distance;
-            this.directionP = Quaternion.AngleAxis(90, Vector3.up) * dirVec;
+            directionP = Quaternion.AngleAxis(90, Vector3.up) * dirVec;
             return dirVec;
         }
 
@@ -182,7 +182,7 @@ namespace Wizardry
                 if (curCell.InBounds(map) && curCell.IsValid)
                 {
                     victim = curCell.GetFirstPawn(map);                    
-                    if (victim != null && !victim.Downed && !victim.Dead && victim.Faction != this.caster.Faction)
+                    if (victim != null && !victim.Downed && !victim.Dead && victim.Faction != caster.Faction)
                     {
                         if(victim != null)
                         { 
@@ -203,12 +203,12 @@ namespace Wizardry
         {
             float result = 0;
             IntVec3 curCell;
-            List<Thing> fireList = this.Map.listerThings.ThingsOfDef(ThingDefOf.Fire);
+            List<Thing> fireList = Map.listerThings.ThingsOfDef(ThingDefOf.Fire);
             IEnumerable<IntVec3> targetCells = GenRadial.RadialCellsAround(center, radius, true);
             for (int i = 0; i < targetCells.Count(); i++)
             {
                 curCell = targetCells.ToArray<IntVec3>()[i];
-                if (curCell.InBounds(this.Map) && curCell.IsValid)
+                if (curCell.InBounds(Map) && curCell.IsValid)
                 {                    
                     for (int j = 0; j < fireList.Count; j++)
                     {
@@ -226,12 +226,12 @@ namespace Wizardry
 
         public void RemoveFireAtPosition(IntVec3 pos)
         {
-            GenExplosion.DoExplosion(pos, this.Map, 1, DamageDefOf.Extinguish, this.launcher, 100, 0, SoundDef.Named("ExpandingFlames"), def, this.equipmentDef, null, null, 0f, 1, false, null, 0f, 1, 0f, false);
+            GenExplosion.DoExplosion(pos, Map, 1, DamageDefOf.Extinguish, launcher, 100, 0, SoundDef.Named("ExpandingFlames"), def, equipmentDef, null, null, 0f, 1, false, null, 0f, 1, 0f, false);
         }
 
         public void DamageEntities(Thing e)
         {            
-            int amt = Mathf.RoundToInt(Rand.Range(this.def.projectile.GetDamageAmount(1, null) * .5f, this.def.projectile.GetDamageAmount(1, null) * 1.5f) + this.fireAmount);
+            int amt = Mathf.RoundToInt(Rand.Range(def.projectile.GetDamageAmount(1, null) * .5f, def.projectile.GetDamageAmount(1, null) * 1.5f) + fireAmount);
             DamageInfo dinfo = new DamageInfo(DamageDefOf.Flame, amt, 0, (float)-1, null, null, null, DamageInfo.SourceCategory.ThingOrUnknown);
             bool flag = e != null;
             if (flag)
@@ -243,7 +243,7 @@ namespace Wizardry
         public override void Tick()
         {
             base.Tick();
-            this.age++;
+            age++;
         }
     }
 }

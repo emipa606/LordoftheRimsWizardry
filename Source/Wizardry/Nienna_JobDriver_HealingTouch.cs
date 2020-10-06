@@ -22,7 +22,7 @@ namespace Wizardry
 
         public override bool TryMakePreToilReservations(bool errorOnFailed)
         {
-            if (pawn.Reserve(TargetA, this.job, 1, 1, null, errorOnFailed))
+            if (pawn.Reserve(TargetA, job, 1, 1, null, errorOnFailed))
             {
                 return true;
             }
@@ -46,32 +46,32 @@ namespace Wizardry
             {
                 if (age > duration)
                 {
-                    this.EndJobWith(JobCondition.Succeeded);
+                    EndJobWith(JobCondition.Succeeded);
                 }
                 if (patient.DestroyedOrNull() || patient.Dead)
                 {
-                    this.EndJobWith(JobCondition.Incompletable);
+                    EndJobWith(JobCondition.Incompletable);
                 }
             };
             doHealing.tickAction = delegate
             {
                 if(patient.DestroyedOrNull() || patient.Dead)
                 {
-                    this.EndJobWith(JobCondition.Incompletable);
+                    EndJobWith(JobCondition.Incompletable);
                 }
                 if(Find.TickManager.TicksGame % 1 ==0)
                 {
-                    EffectMaker.MakeEffect(ThingDef.Named("Mote_HealingMote"), this.pawn.DrawPos, this.Map, Rand.Range(.3f, .5f), (Quaternion.AngleAxis(90, Vector3.up) * GetVector(this.pawn.Position, patient.Position)).ToAngleFlat() + Rand.Range(-10,10), 5f, 0);
+                    EffectMaker.MakeEffect(ThingDef.Named("Mote_HealingMote"), pawn.DrawPos, Map, Rand.Range(.3f, .5f), (Quaternion.AngleAxis(90, Vector3.up) * GetVector(pawn.Position, patient.Position)).ToAngleFlat() + Rand.Range(-10,10), 5f, 0);
 
                 }
                 if (age > (lastHeal + ticksTillNextHeal))
                 {
                     DoHealingEffect(patient);
-                    EffectMaker.MakeEffect(ThingDef.Named("Mote_HealingCircles"), patient.DrawPos, this.Map, Rand.Range(.3f, .4f), 0, 0, Rand.Range(400, 500), Rand.Range(0, 360), .08f, .01f, .24f, false);
+                    EffectMaker.MakeEffect(ThingDef.Named("Mote_HealingCircles"), patient.DrawPos, Map, Rand.Range(.3f, .4f), 0, 0, Rand.Range(400, 500), Rand.Range(0, 360), .08f, .01f, .24f, false);
                     lastHeal = age;
-                    if(this.injuryCount == 0)
+                    if(injuryCount == 0)
                     {
-                        this.EndJobWith(JobCondition.Succeeded);
+                        EndJobWith(JobCondition.Succeeded);
                     }
                 }
                 if (!patient.Drafted && patient.CurJobDef != JobDefOf.Wait)
@@ -86,18 +86,18 @@ namespace Wizardry
                 ticksLeftThisToil = duration - age;
                 if (age > duration)
                 {
-                    this.EndJobWith(JobCondition.Succeeded);
+                    EndJobWith(JobCondition.Succeeded);
                 }
             };
             doHealing.defaultCompleteMode = ToilCompleteMode.Delay;
-            doHealing.defaultDuration = this.duration;
+            doHealing.defaultDuration = duration;
             doHealing.WithProgressBar(TargetIndex.B, delegate
             {
-                if (this.pawn.DestroyedOrNull() || this.pawn.Dead)
+                if (pawn.DestroyedOrNull() || pawn.Dead)
                 {
                     return 1f;
                 }
-                return 1f - (float)doHealing.actor.jobs.curDriver.ticksLeftThisToil / this.duration;
+                return 1f - (float)doHealing.actor.jobs.curDriver.ticksLeftThisToil / duration;
 
             }, false, 0f);
             doHealing.AddFinishAction(delegate
@@ -113,7 +113,7 @@ namespace Wizardry
         private void DoHealingEffect(Pawn patient)
         {
             int num = 1;
-            this.injuryCount = 0; 
+            injuryCount = 0; 
             using (IEnumerator<BodyPartRecord> enumerator = patient.health.hediffSet.GetInjuredParts().GetEnumerator())
             {
                 while (enumerator.MoveNext())
@@ -134,7 +134,7 @@ namespace Wizardry
                                 bool flag5 = current.CanHealNaturally() && !current.IsPermanent();
                                 if (flag5)
                                 {
-                                    this.injuryCount++;
+                                    injuryCount++;
                                     current.Heal(Rand.Range(1f, 2f));
                                     num--;
                                     num2--;

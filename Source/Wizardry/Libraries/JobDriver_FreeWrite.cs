@@ -27,22 +27,22 @@ namespace Wizardry
         protected override IEnumerable<Toil> MakeNewToils()
         {
             this.EndOnDespawnedOrNull(TargetIndex.A, JobCondition.Incompletable);
-            yield return Toils_Reserve.Reserve(TargetIndex.A, base.job.def.joyMaxParticipants);
-            if (this.TargetB != null)
+            yield return Toils_Reserve.Reserve(TargetIndex.A, job.def.joyMaxParticipants);
+            if (TargetB != null)
                 yield return Toils_Reserve.Reserve(TargetIndex.B, 1);
             yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.OnCell);
             Toil toil = new Toil();
             toil.PlaySustainerOrSound(DefDatabase<SoundDef>.GetNamed("Estate_SoundManualTypewriter"));
             toil.tickAction = delegate
             {
-                this.pawn.rotationTracker.FaceCell(this.TargetA.Cell);
-                this.pawn.GainComfortFromCellIfPossible();
-                float statValue = this.TargetThingA.GetStatValue(StatDefOf.JoyGainFactor, true);
+                pawn.rotationTracker.FaceCell(TargetA.Cell);
+                pawn.GainComfortFromCellIfPossible();
+                float statValue = TargetThingA.GetStatValue(StatDefOf.JoyGainFactor, true);
                 float extraJoyGainFactor = statValue;
-                JoyUtility.JoyTickCheckEnd(this.pawn, JoyTickFullJoyAction.EndJob, extraJoyGainFactor);
+                JoyUtility.JoyTickCheckEnd(pawn, JoyTickFullJoyAction.EndJob, extraJoyGainFactor);
             };
             toil.defaultCompleteMode = ToilCompleteMode.Delay;
-            toil.defaultDuration = base.job.def.joyDuration;
+            toil.defaultDuration = job.def.joyDuration;
 //            toil.AddFinishAction(delegate
 //            {
 //                if (Cthulhu.Utility.IsCosmicHorrorsLoaded())

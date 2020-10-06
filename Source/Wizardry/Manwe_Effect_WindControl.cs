@@ -19,17 +19,17 @@ namespace Wizardry
         {
             try
             {
-                CompWizardry comp = this.CasterPawn.GetComp<CompWizardry>();
+                CompWizardry comp = CasterPawn.GetComp<CompWizardry>();
                 comp.SecondTarget = null;
 
-                LocalTargetInfo t = this.currentTarget;
+                LocalTargetInfo t = currentTarget;
                 IntVec3 targetCell = t.Cell;
 
-                launchableThing = t.Cell.GetFirstPawn(this.CasterPawn.Map);
+                launchableThing = t.Cell.GetFirstPawn(CasterPawn.Map);
 
                 if (launchableThing == null)
                 {
-                    List<Thing> cellThings = t.Cell.GetThingList(this.CasterPawn.Map);
+                    List<Thing> cellThings = t.Cell.GetThingList(CasterPawn.Map);
                     for (int i = 0; i < cellThings.Count(); i++)
                     {
                         if (cellThings[i].def.EverHaulable)
@@ -47,8 +47,8 @@ namespace Wizardry
                     {
                         LongEventHandler.QueueLongEvent(delegate
                         {
-                            Manwe_FlyingObject_WindControl flyingObject = (Manwe_FlyingObject_WindControl)GenSpawn.Spawn(ThingDef.Named("FlyingObject_WindControl"), this.currentTarget.Cell, this.CasterPawn.Map);
-                            flyingObject.Launch(this.CasterPawn, t.Cell, launchableThing);
+                            Manwe_FlyingObject_WindControl flyingObject = (Manwe_FlyingObject_WindControl)GenSpawn.Spawn(ThingDef.Named("FlyingObject_WindControl"), currentTarget.Cell, CasterPawn.Map);
+                            flyingObject.Launch(CasterPawn, t.Cell, launchableThing);
                         }, "LaunchingFlyer", false, null);
                     }
                     else
@@ -57,12 +57,12 @@ namespace Wizardry
                     }
 
                     Find.Targeter.StopTargeting();
-                    this.BeginTargetingWithVerb(WizardryDefOf.CompVerb, WizardryDefOf.CompVerb.MainVerb.targetParams, delegate (LocalTargetInfo info)
+                    BeginTargetingWithVerb(WizardryDefOf.CompVerb, WizardryDefOf.CompVerb.MainVerb.targetParams, delegate (LocalTargetInfo info)
                     {
-                        this.action = info;
-                        comp = this.CasterPawn.GetComp<CompWizardry>();
+                        action = info;
+                        comp = CasterPawn.GetComp<CompWizardry>();
                         comp.SecondTarget = info;
-                    }, this.CasterPawn, null, null);
+                    }, CasterPawn, null, null);
                 }
             }
             catch(NullReferenceException ex)
@@ -76,7 +76,7 @@ namespace Wizardry
         {
             if (inResult)
             {
-                this.Effect();
+                Effect();
                 outResult = true;
 
             }

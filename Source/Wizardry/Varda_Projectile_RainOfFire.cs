@@ -27,24 +27,24 @@ namespace Wizardry
         {
             base.ExposeData();
             //Scribe_Values.Look<bool>(ref this.initialized, "initialized", false, false);
-            Scribe_Values.Look<int>(ref this.age, "age", 0, false);
-            Scribe_Values.Look<int>(ref this.lastStrikeSmall, "lastStrikeSmall", 0, false);
-            Scribe_Values.Look<int>(ref this.lastStrike, "lastStrike", 0, false);
-            Scribe_Collections.Look<Skyfaller>(ref this.skyfallers, "skyfallers", LookMode.Reference);
-            Scribe_Collections.Look<Skyfaller>(ref this.skyfallersSmall, "skyfallersSmall", LookMode.Reference);
-            Scribe_Values.Look<CellRect>(ref this.cellRect, "cellRect", default, false);
+            Scribe_Values.Look<int>(ref age, "age", 0, false);
+            Scribe_Values.Look<int>(ref lastStrikeSmall, "lastStrikeSmall", 0, false);
+            Scribe_Values.Look<int>(ref lastStrike, "lastStrike", 0, false);
+            Scribe_Collections.Look<Skyfaller>(ref skyfallers, "skyfallers", LookMode.Reference);
+            Scribe_Collections.Look<Skyfaller>(ref skyfallersSmall, "skyfallersSmall", LookMode.Reference);
+            Scribe_Values.Look<CellRect>(ref cellRect, "cellRect", default, false);
         }
 
         public void Initialize(Map map)
         {
-            cellRect = CellRect.CenteredOn(base.Position, (int)(base.def.projectile.explosionRadius));
+            cellRect = CellRect.CenteredOn(Position, (int)(def.projectile.explosionRadius));
             cellRect.ClipInsideMap(map);
             initialized = true;
         }
 
         protected override void Impact(Thing hitThing)
         {
-            Map map = base.Map;
+            Map map = Map;
             base.Impact(hitThing);
             ThingDef def = this.def;
             IntVec3 impactPos;
@@ -54,16 +54,16 @@ namespace Wizardry
             }
 
             impactPos = cellRect.RandomCell;
-            if (this.age > (lastStrike + strikeDelay) && impactPos.Standable(map) && impactPos.InBounds(map))
+            if (age > (lastStrike + strikeDelay) && impactPos.Standable(map) && impactPos.InBounds(map))
             {
-                this.lastStrike = this.age;
-                this.strikeDelay = Rand.Range(45, 90);
+                lastStrike = age;
+                strikeDelay = Rand.Range(45, 90);
                 skyfallers.Add(SkyfallerMaker.SpawnSkyfaller(ThingDef.Named("Skyfaller_RainOfFire"), impactPos, map));
                 skyfallers[skyfallers.Count-1].angle = Rand.Range(-40, 0);
             }
-            else if (this.age > (lastStrikeSmall + smallStrikeDelay) && this.age > smallStartDelay)
+            else if (age > (lastStrikeSmall + smallStrikeDelay) && age > smallStartDelay)
             {
-                this.lastStrikeSmall = this.age;
+                lastStrikeSmall = age;
                 skyfallersSmall.Add(SkyfallerMaker.SpawnSkyfaller(ThingDef.Named("Skyfaller_RainOfFire_Small"), impactPos, map));
                 skyfallersSmall[skyfallersSmall.Count - 1].angle = Rand.Range(-40, 0);
             }
@@ -72,7 +72,7 @@ namespace Wizardry
             {
                 if (skyfallers[i].ticksToImpact == 0)
                 {
-                    this.expandingTick++;
+                    expandingTick++;
                     IntVec3 centerCell = skyfallers[i].Position;
                     IntVec3 curCell;
                     IEnumerable<IntVec3> oldExplosionCells = GenRadial.RadialCellsAround(centerCell, expandingTick-1, true);
@@ -86,13 +86,13 @@ namespace Wizardry
                             Vector3 heading = (curCell - centerCell).ToVector3();
                             float distance = heading.magnitude;
                             Vector3 direction = heading / distance;
-                            EffectMaker.MakeEffect(WizardryDefOf.Mote_ExpandingFlame, curCell.ToVector3(), this.Map, .8f, (Quaternion.AngleAxis(90, Vector3.up) * direction).ToAngleFlat(), 4f, Rand.Range(100, 200));
-                            EffectMaker.MakeEffect(WizardryDefOf.Mote_RecedingFlame, curCell.ToVector3(), this.Map, .7f, (Quaternion.AngleAxis(90, Vector3.up) * direction).ToAngleFlat(), 1f, 0);
+                            EffectMaker.MakeEffect(WizardryDefOf.Mote_ExpandingFlame, curCell.ToVector3(), Map, .8f, (Quaternion.AngleAxis(90, Vector3.up) * direction).ToAngleFlat(), 4f, Rand.Range(100, 200));
+                            EffectMaker.MakeEffect(WizardryDefOf.Mote_RecedingFlame, curCell.ToVector3(), Map, .7f, (Quaternion.AngleAxis(90, Vector3.up) * direction).ToAngleFlat(), 1f, 0);
                         }
                     }
                     if(expandingTick == 3)
                     {
-                        this.expandingTick = 0;
+                        expandingTick = 0;
                         skyfallers.Remove(skyfallers[i]);
                     }
                 }                
@@ -101,7 +101,7 @@ namespace Wizardry
 
         public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
         {
-            bool flag = this.age < duration;
+            bool flag = age < duration;
             if (!flag)
             {
                 skyfallers.Clear();
@@ -113,7 +113,7 @@ namespace Wizardry
         public override void Tick()
         {
             base.Tick();
-            this.age++;
+            age++;
         }
     }
 }

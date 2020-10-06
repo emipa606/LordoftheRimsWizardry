@@ -15,7 +15,7 @@ namespace Wizardry
         {
             Map map = base.CasterPawn.Map;
             Pawn pawn = base.CasterPawn;
-            IntVec3 centerCell = this.currentTarget.Cell;
+            IntVec3 centerCell = currentTarget.Cell;
             if ((centerCell.IsValid && centerCell.InBounds(map)))
             {
                 bool flag = map.weatherManager.curWeather.defName == "Rain" || map.weatherManager.curWeather.defName == "RainyThunderstorm" || map.weatherManager.curWeather.defName == "FoggyRain";
@@ -29,8 +29,8 @@ namespace Wizardry
                     Messages.Message("unable to invoke healing rain - weather is not rain or is transitioning", MessageTypeDefOf.RejectInput);
                 }
             }
-            this.Ability.PostAbilityAttempt();
-            this.burstShotsLeft = 0;
+            Ability.PostAbilityAttempt();
+            burstShotsLeft = 0;
             return false;
         }
         

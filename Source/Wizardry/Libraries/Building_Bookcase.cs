@@ -16,8 +16,8 @@ namespace Wizardry
             string baseStr = base.GetInspectString();
             if (baseStr != "")
                 s.AppendLine(baseStr);
-            if (this.innerContainer.Count > 0)
-                s.AppendLine("Estate_ContainsXBooks".Translate(this.innerContainer.Count));
+            if (innerContainer.Count > 0)
+                s.AppendLine("Estate_ContainsXBooks".Translate(innerContainer.Count));
             s.AppendLine("Estate_XSlotsForBooks".Translate(CompStorageGraphic.Props.countFullCapacity));
             return s.ToString().TrimEndNewlines();
         }
@@ -26,7 +26,7 @@ namespace Wizardry
         {
             foreach (Gizmo g in base.GetGizmos())
                 yield return g;
-            if (this.innerContainer.Count > 0)
+            if (innerContainer.Count > 0)
             {
                 yield return new Command_Action()
                 {
@@ -47,7 +47,7 @@ namespace Wizardry
         {
 
             List<FloatMenuOption> list = new List<FloatMenuOption>();
-            Map map = this.Map;
+            Map map = Map;
             if (innerContainer.Count != 0)
             {
                 foreach (ThingBook current in innerContainer)
@@ -59,7 +59,7 @@ namespace Wizardry
                     Func<Rect, bool> extraPartOnGUI = (Rect rect) => Widgets.InfoCardButton(rect.x + 5f, rect.y + (rect.height - 24f) / 2f, current);
                     arg_121_0.Add(new FloatMenuOption(text, delegate
                     {
-                        base.TryDrop(current);
+                        TryDrop(current);
                     }, MenuOptionPriority.Default, null, null, 29f, extraPartOnGUI, null));
                 }
             }

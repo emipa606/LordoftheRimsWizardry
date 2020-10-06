@@ -19,7 +19,7 @@ namespace Wizardry
         {
             if (targ.IsValid && targ.CenterVector3.InBounds(base.CasterPawn.Map) && !targ.Cell.Fogged(base.CasterPawn.Map) && targ.Cell.Walkable(base.CasterPawn.Map))
             {
-                if ((root - targ.Cell).LengthHorizontal < this.verbProps.range)
+                if ((root - targ.Cell).LengthHorizontal < verbProps.range)
                 {
                     validTarg = true;
                 }
@@ -40,7 +40,7 @@ namespace Wizardry
         {
             bool flag = true;
             base.TryCastShot();
-            this.PostCastShot(flag, out flag);
+            PostCastShot(flag, out flag);
             return flag;
         }
 
@@ -50,12 +50,12 @@ namespace Wizardry
             comp.SecondTarget = null;
 
             Find.Targeter.StopTargeting();
-            this.BeginTargetingWithVerb(WizardryDefOf.CompVerb, WizardryDefOf.CompVerb.MainVerb.targetParams, delegate (LocalTargetInfo info)
+            BeginTargetingWithVerb(WizardryDefOf.CompVerb, WizardryDefOf.CompVerb.MainVerb.targetParams, delegate (LocalTargetInfo info)
             {
-                this.action = info;
-                comp = this.CasterPawn.GetComp<CompWizardry>();
+                action = info;
+                comp = CasterPawn.GetComp<CompWizardry>();
                 comp.SecondTarget = info;
-            }, this.CasterPawn, null, null);
+            }, CasterPawn, null, null);
             outResult = inResult;
         }
 

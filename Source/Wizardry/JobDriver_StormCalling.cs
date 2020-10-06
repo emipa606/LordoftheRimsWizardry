@@ -31,19 +31,19 @@ namespace Wizardry
             {
                 if (age > duration)
                 {
-                    this.EndJobWith(JobCondition.Succeeded);
+                    EndJobWith(JobCondition.Succeeded);
                 }
-                Map map = this.pawn.Map;
+                Map map = pawn.Map;
                 bool flag = map.weatherManager.curWeather.defName == "Rain" || map.weatherManager.curWeather.defName == "RainyThunderstorm" || map.weatherManager.curWeather.defName == "FoggyRain" || 
                 map.weatherManager.curWeather.defName == "SnowHard" || map.weatherManager.curWeather.defName == "SnowGentle" || map.weatherManager.curWeather.defName == "DryThunderstorm";
                 if (!flag)
                 {
-                    this.EndJobWith(JobCondition.Succeeded);
+                    EndJobWith(JobCondition.Succeeded);
                 }
-                this.GetTargetList();
+                GetTargetList();
                 if (targetList.Count < 1)
                 {
-                    this.EndJobWith(JobCondition.Succeeded);
+                    EndJobWith(JobCondition.Succeeded);
                 }
             };
             commandStorm.tickAction = delegate
@@ -63,22 +63,22 @@ namespace Wizardry
                 ticksLeftThisToil = duration - age;
                 if (age > duration)
                 {
-                    this.EndJobWith(JobCondition.Succeeded);
+                    EndJobWith(JobCondition.Succeeded);
                 }
-                if (this.Map.weatherManager.curWeather.defName == "Clear")
+                if (Map.weatherManager.curWeather.defName == "Clear")
                 {
-                    this.EndJobWith(JobCondition.Succeeded);
+                    EndJobWith(JobCondition.Succeeded);
                 }
             };
             commandStorm.defaultCompleteMode = ToilCompleteMode.Delay;
-            commandStorm.defaultDuration = this.duration;
+            commandStorm.defaultDuration = duration;
             commandStorm.WithProgressBar(TargetIndex.A, delegate
             {
-                if (this.pawn.DestroyedOrNull() || this.pawn.Dead || this.pawn.Downed)
+                if (pawn.DestroyedOrNull() || pawn.Dead || pawn.Downed)
                 {
                     return 1f;
                 }
-                return 1f - (float)commandStorm.actor.jobs.curDriver.ticksLeftThisToil / this.duration;
+                return 1f - (float)commandStorm.actor.jobs.curDriver.ticksLeftThisToil / duration;
 
             }, false, 0f);
             commandStorm.AddFinishAction(delegate
@@ -91,10 +91,10 @@ namespace Wizardry
 
         private void GetTargetList()
         {
-            List<Pawn> mapPawns = this.Map.mapPawns.AllPawnsSpawned;
+            List<Pawn> mapPawns = Map.mapPawns.AllPawnsSpawned;
             for (int i =0; i < mapPawns.Count(); i++)
             {
-                if(!mapPawns[i].DestroyedOrNull() && !mapPawns[i].Dead && !mapPawns[i].Downed && mapPawns[i].HostileTo(this.pawn))
+                if(!mapPawns[i].DestroyedOrNull() && !mapPawns[i].Dead && !mapPawns[i].Downed && mapPawns[i].HostileTo(pawn))
                 {
                     targetList.Add(mapPawns[i]);                    
                 }
@@ -123,7 +123,7 @@ namespace Wizardry
                 IntVec3 strikeLoc = pawn.Position;
                 strikeLoc.x += Rand.Range(-2, 2);
                 strikeLoc.z += Rand.Range(-2, 2);
-                Map.weatherManager.eventHandler.AddEvent(new WeatherEvent_LightningStrike(this.Map, strikeLoc));
+                Map.weatherManager.eventHandler.AddEvent(new WeatherEvent_LightningStrike(Map, strikeLoc));
                 //want a larger explosion or more effects like stun?
                 //GenExplosion.DoExplosion(this.centerLocation.ToIntVec3, this.Map, this.areaRadius, DamageDefOf.Bomb, null, Rand.Range(6, 16), SoundDefOf.Thunder_OffMap, null, null, null, 0f, 1, false, null, 0f, 1, 0.1f, true);
             }

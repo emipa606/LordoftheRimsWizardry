@@ -19,7 +19,7 @@ namespace Wizardry
         {
             if (targ.IsValid && targ.CenterVector3.InBounds(base.CasterPawn.Map) && !targ.Cell.Fogged(base.CasterPawn.Map) && targ.Cell.Walkable(base.CasterPawn.Map))
             {
-                if ((root - targ.Cell).LengthHorizontal < this.verbProps.range)
+                if ((root - targ.Cell).LengthHorizontal < verbProps.range)
                 {
                     validTarg = true;
                 }
@@ -39,9 +39,9 @@ namespace Wizardry
         protected override bool TryCastShot()
         {
             bool flag = true;
-            if(this.currentTarget.Thing != null)
+            if(currentTarget.Thing != null)
             {
-                if (this.currentTarget.Thing is Pawn targetPawn)
+                if (currentTarget.Thing is Pawn targetPawn)
                 {
                     HealthUtility.AdjustSeverity(targetPawn, HediffDef.Named("LotRW_DoomHD"), 1f);
                     for (int i = 0; i < 4; i++)

@@ -19,7 +19,7 @@ namespace Wizardry
         public override void SpawnSetup(Map map, bool bla)
         {
             base.SpawnSetup(map, bla);
-            this.artComp = base.GetComp<CompArt>();
+            artComp = GetComp<CompArt>();
             ResolveOwner();
         }
 
@@ -27,7 +27,7 @@ namespace Wizardry
         {
             if (artComp != null)
             {
-                foreach (Pawn colonist in this.Map.mapPawns.FreeColonistsSpawned)
+                foreach (Pawn colonist in Map.mapPawns.FreeColonistsSpawned)
                 {
                     if (colonist.Name.ToStringFull == artComp.AuthorName )
                     {
@@ -52,11 +52,11 @@ namespace Wizardry
             base.ExposeData();
             // Save and load the work variables, so they don't default after loading
 
-            Scribe_Values.Look<bool>(ref this.IsBook, "IsBook", false);
-            Scribe_Values.Look<bool>(ref this.saveOwner, "saveOwner", false, false);
-            if (this.saveOwner)
+            Scribe_Values.Look<bool>(ref IsBook, "IsBook", false);
+            Scribe_Values.Look<bool>(ref saveOwner, "saveOwner", false, false);
+            if (saveOwner)
             {
-                Scribe_References.Look<Pawn>(ref this.owner, "owner", false);
+                Scribe_References.Look<Pawn>(ref owner, "owner", false);
             }
         }
 
@@ -78,7 +78,7 @@ namespace Wizardry
                     defaultDesc = "Disposes of unwanted journal pages.",
                     action = delegate
                     {
-                        this.DeSpawn();
+                        DeSpawn();
                     },
                     hotKey = KeyBindingDefOf.Misc3
                 };

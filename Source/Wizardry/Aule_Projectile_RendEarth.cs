@@ -40,25 +40,25 @@ namespace Wizardry
         public override void ExposeData()
         {
             base.ExposeData();
-            Scribe_Values.Look<bool>(ref this.initialized, "initialized", false, false);
-            Scribe_Values.Look<bool>(ref this.wallImpact, "wallImpact", false, false);
-            Scribe_Values.Look<int>(ref this.age, "age", -1, false);
-            Scribe_Values.Look<int>(ref this.duration, "duration", 0, false);
-            Scribe_Values.Look<int>(ref this.approximateDuration, "approximateDuration", 0, false);
-            Scribe_Values.Look<int>(ref this.strikeCount, "strikeCount", 0, false);
-            Scribe_Values.Look<float>(ref this.distance, "distance", 0, false);
-            Scribe_Values.Look<float>(ref this.angle, "angle", 0, false);
-            Scribe_Values.Look<IntVec3>(ref this.boltOrigin, "boltOrigin", default, false);
-            Scribe_Values.Look<IntVec3>(ref this.boltPosition, "boltPosition", default, false);
-            Scribe_Values.Look<Vector3>(ref this.direction, "direction", default, false);
+            Scribe_Values.Look<bool>(ref initialized, "initialized", false, false);
+            Scribe_Values.Look<bool>(ref wallImpact, "wallImpact", false, false);
+            Scribe_Values.Look<int>(ref age, "age", -1, false);
+            Scribe_Values.Look<int>(ref duration, "duration", 0, false);
+            Scribe_Values.Look<int>(ref approximateDuration, "approximateDuration", 0, false);
+            Scribe_Values.Look<int>(ref strikeCount, "strikeCount", 0, false);
+            Scribe_Values.Look<float>(ref distance, "distance", 0, false);
+            Scribe_Values.Look<float>(ref angle, "angle", 0, false);
+            Scribe_Values.Look<IntVec3>(ref boltOrigin, "boltOrigin", default, false);
+            Scribe_Values.Look<IntVec3>(ref boltPosition, "boltPosition", default, false);
+            Scribe_Values.Look<Vector3>(ref direction, "direction", default, false);
         }
 
         public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
         {
-            bool flag = this.age < (duration + fadeTicks);
+            bool flag = age < (duration + fadeTicks);
             if (!flag)
             {
-                Aule_Projectile_RendEarth.boltMeshes.Clear();
+                boltMeshes.Clear();
                 base.Destroy(mode);
             }
         }
@@ -67,55 +67,55 @@ namespace Wizardry
         {
             base.Impact(hitThing);
             ThingDef def = this.def;
-            this.caster = this.launcher as Pawn;
-            if (this.Map != null)
+            caster = launcher as Pawn;
+            if (Map != null)
             {
-                if (!this.initialized)
+                if (!initialized)
                 {
-                    this.direction = GetVector(this.caster.Position, base.Position);
-                    this.angle = (Quaternion.AngleAxis(90, Vector3.up) * this.direction).ToAngleFlat();
-                    this.boltOrigin = this.caster.Position + (2f * this.direction).ToIntVec3();                    
-                    this.maxRange = (this.boltOrigin - base.Position).LengthHorizontal;
-                    this.boltMaxCount = Mathf.RoundToInt(this.maxRange);
-                    this.approximateDuration = (int)((this.maxRange / this.boltTravelRate) * this.ticksPerStrike * 1.25f);                    
-                    this.boltMesh = this.RandomBoltMesh;
-                    this.initialized = true;                    
+                    direction = GetVector(caster.Position, Position);
+                    angle = (Quaternion.AngleAxis(90, Vector3.up) * direction).ToAngleFlat();
+                    boltOrigin = caster.Position + (2f * direction).ToIntVec3();                    
+                    maxRange = (boltOrigin - Position).LengthHorizontal;
+                    boltMaxCount = Mathf.RoundToInt(maxRange);
+                    approximateDuration = (int)((maxRange / boltTravelRate) * ticksPerStrike * 1.25f);                    
+                    boltMesh = RandomBoltMesh;
+                    initialized = true;                    
                 }                
 
-                if (this.nextStrike < this.age && this.age < this.duration && !this.wallImpact)
+                if (nextStrike < age && age < duration && !wallImpact)
                 {
-                    this.strikeCount++;
-                    this.boltMesh = null;
-                    this.boltPosition = (this.boltOrigin + (this.boltTravelRate * this.strikeCount * this.direction).ToIntVec3());
-                    this.boltRange = (this.boltOrigin - this.boltPosition).LengthHorizontal;
-                    this.boltMaxCount = Mathf.RoundToInt(this.boltRange);
-                    this.boltMesh = this.RandomBoltMesh;                    
-                    this.nextStrike = this.age + this.ticksPerStrike;
-                    DoQuakeDamages(2, this.boltPosition);
+                    strikeCount++;
+                    boltMesh = null;
+                    boltPosition = (boltOrigin + (boltTravelRate * strikeCount * direction).ToIntVec3());
+                    boltRange = (boltOrigin - boltPosition).LengthHorizontal;
+                    boltMaxCount = Mathf.RoundToInt(boltRange);
+                    boltMesh = RandomBoltMesh;                    
+                    nextStrike = age + ticksPerStrike;
+                    DoQuakeDamages(2, boltPosition);
                     
                     if (Rand.Chance(.6f))
                     {
                         IntVec3 smallMeshDestination;
                         if (Rand.Chance(.5f))
                         {
-                            smallMeshDestination = (this.boltPosition + ((Quaternion.AngleAxis(Rand.Range(30, 60), Vector3.up) * direction) * Rand.Range(2f, 5f)).ToIntVec3());
+                            smallMeshDestination = (boltPosition + ((Quaternion.AngleAxis(Rand.Range(30, 60), Vector3.up) * direction) * Rand.Range(2f, 5f)).ToIntVec3());
                         }
                         else
                         {
-                            smallMeshDestination = (this.boltPosition + ((Quaternion.AngleAxis(Rand.Range(-30, -60), Vector3.up) * direction) * Rand.Range(2f, 5f)).ToIntVec3());
+                            smallMeshDestination = (boltPosition + ((Quaternion.AngleAxis(Rand.Range(-30, -60), Vector3.up) * direction) * Rand.Range(2f, 5f)).ToIntVec3());
                         }
 
-                        Map.weatherManager.eventHandler.AddEvent(new MeshMaker(this.Map, MatPool.rendEarthMat7, this.boltPosition, smallMeshDestination, Rand.Range(2f, 6f), AltitudeLayer.Floor, this.approximateDuration - this.age, this.fadeTicks, 10));
+                        Map.weatherManager.eventHandler.AddEvent(new MeshMaker(Map, MatPool.rendEarthMat7, boltPosition, smallMeshDestination, Rand.Range(2f, 6f), AltitudeLayer.Floor, approximateDuration - age, fadeTicks, 10));
                         DoQuakeDamages(1.4f, smallMeshDestination);                       
                     }
 
-                    if (this.maxRange < (this.boltOrigin - this.boltPosition).LengthHorizontal)
+                    if (maxRange < (boltOrigin - boltPosition).LengthHorizontal)
                     {
-                        this.wallImpact = true;
-                        this.duration = this.approximateDuration;
+                        wallImpact = true;
+                        duration = approximateDuration;
                     }
                 }
-                DrawStrike(this.boltOrigin, this.boltPosition.ToVector3());
+                DrawStrike(boltOrigin, boltPosition.ToVector3());
             }
         }
 
@@ -128,28 +128,28 @@ namespace Wizardry
                 Pawn pawn = null;
                 IntVec3 intVec = location + GenRadial.RadialPattern[i];
                 structure = null;
-                if (intVec.IsValid && intVec.InBounds(this.Map))
+                if (intVec.IsValid && intVec.InBounds(Map))
                 {
                     if (Rand.Chance(.4f))
                     {
-                        EffectMaker.MakeEffect(ThingDef.Named("Mote_ThickDust"), intVec.ToVector3Shifted(), this.Map, Rand.Range(.2f, 2f), Rand.Range(0, 360), Rand.Range(.5f, 1f), Rand.Range(10, 250), 0, Rand.Range(.3f, .9f), Rand.Range(.05f, .3f), Rand.Range(.6f, 2.4f), true);
+                        EffectMaker.MakeEffect(ThingDef.Named("Mote_ThickDust"), intVec.ToVector3Shifted(), Map, Rand.Range(.2f, 2f), Rand.Range(0, 360), Rand.Range(.5f, 1f), Rand.Range(10, 250), 0, Rand.Range(.3f, .9f), Rand.Range(.05f, .3f), Rand.Range(.6f, 2.4f), true);
                     }
 
-                    structure = intVec.GetFirstBuilding(this.Map);
+                    structure = intVec.GetFirstBuilding(Map);
                     if (structure != null)
                     {
                         if (structure.def.designationCategory == DesignationCategoryDefOf.Structure)
                         {
                             DamageEntities(structure, structure.def.BaseMaxHitPoints, DamageDefOf.Crush);
-                            Vector3 moteDirection = GetVector(this.origin.ToIntVec3(), intVec);
-                            EffectMaker.MakeEffect(ThingDef.Named("Mote_Rubble"), intVec.ToVector3Shifted(), base.Map, Rand.Range(.3f, .5f), (Quaternion.AngleAxis(90, Vector3.up) * moteDirection).ToAngleFlat(), 8f, 0);
-                            EffectMaker.MakeEffect(ThingDef.Named("Mote_Rubble"), intVec.ToVector3Shifted(), base.Map, Rand.Range(.3f, .6f), (Quaternion.AngleAxis(Rand.Range(-70, -110), Vector3.up) * moteDirection).ToAngleFlat(), 6f, 0);
-                            GenExplosion.DoExplosion(intVec, base.Map, .4f, WizardryDefOf.LotRW_RockFragments, this.launcher, Rand.Range(6, 16), 0, SoundDefOf.Pawn_Melee_Punch_HitBuilding, null, null, null, ThingDef.Named("Filth_RubbleRock"), .4f, 1, false, null, 0f, 1, 0, false);
-                            MoteMaker.ThrowSmoke(intVec.ToVector3Shifted(), base.Map, Rand.Range(.6f, 1f));
-                            if (intVec == this.boltPosition)
+                            Vector3 moteDirection = GetVector(origin.ToIntVec3(), intVec);
+                            EffectMaker.MakeEffect(ThingDef.Named("Mote_Rubble"), intVec.ToVector3Shifted(), Map, Rand.Range(.3f, .5f), (Quaternion.AngleAxis(90, Vector3.up) * moteDirection).ToAngleFlat(), 8f, 0);
+                            EffectMaker.MakeEffect(ThingDef.Named("Mote_Rubble"), intVec.ToVector3Shifted(), Map, Rand.Range(.3f, .6f), (Quaternion.AngleAxis(Rand.Range(-70, -110), Vector3.up) * moteDirection).ToAngleFlat(), 6f, 0);
+                            GenExplosion.DoExplosion(intVec, Map, .4f, WizardryDefOf.LotRW_RockFragments, launcher, Rand.Range(6, 16), 0, SoundDefOf.Pawn_Melee_Punch_HitBuilding, null, null, null, ThingDef.Named("Filth_RubbleRock"), .4f, 1, false, null, 0f, 1, 0, false);
+                            MoteMaker.ThrowSmoke(intVec.ToVector3Shifted(), Map, Rand.Range(.6f, 1f));
+                            if (intVec == boltPosition)
                             {
-                                this.wallImpact = true;
-                                this.duration = this.approximateDuration;
+                                wallImpact = true;
+                                duration = approximateDuration;
                             }
                         }
                         else if (structure.def.building.isResourceRock)
@@ -157,43 +157,43 @@ namespace Wizardry
                             ThingDef yieldThing = structure.def.building.mineableThing;
                             int yieldAmount = (int)(structure.def.building.mineableYield * Rand.Range(.7f, .9f));
                             DamageEntities(structure, structure.def.BaseMaxHitPoints, DamageDefOf.Crush);
-                            Vector3 moteDirection = GetVector(this.origin.ToIntVec3(), intVec);
-                            EffectMaker.MakeEffect(ThingDef.Named("Mote_Rubble"), intVec.ToVector3Shifted(), base.Map, Rand.Range(.3f, .5f), (Quaternion.AngleAxis(90, Vector3.up) * moteDirection).ToAngleFlat(), 8f, 0);
-                            EffectMaker.MakeEffect(ThingDef.Named("Mote_Rubble"), intVec.ToVector3Shifted(), base.Map, Rand.Range(.3f, .6f), (Quaternion.AngleAxis(Rand.Range(-70, -110), Vector3.up) * moteDirection).ToAngleFlat(), 6f, 0);
-                            GenExplosion.DoExplosion(intVec, base.Map, .4f, WizardryDefOf.LotRW_RockFragments, this.launcher, Rand.Range(6, 16), 0, SoundDefOf.Crunch, null, null, null, yieldThing, 1f, yieldAmount, false, null, 0f, 1, 0, false);
-                            MoteMaker.ThrowSmoke(intVec.ToVector3Shifted(), base.Map, Rand.Range(.6f, 1f));
-                            if (intVec == this.boltPosition)
+                            Vector3 moteDirection = GetVector(origin.ToIntVec3(), intVec);
+                            EffectMaker.MakeEffect(ThingDef.Named("Mote_Rubble"), intVec.ToVector3Shifted(), Map, Rand.Range(.3f, .5f), (Quaternion.AngleAxis(90, Vector3.up) * moteDirection).ToAngleFlat(), 8f, 0);
+                            EffectMaker.MakeEffect(ThingDef.Named("Mote_Rubble"), intVec.ToVector3Shifted(), Map, Rand.Range(.3f, .6f), (Quaternion.AngleAxis(Rand.Range(-70, -110), Vector3.up) * moteDirection).ToAngleFlat(), 6f, 0);
+                            GenExplosion.DoExplosion(intVec, Map, .4f, WizardryDefOf.LotRW_RockFragments, launcher, Rand.Range(6, 16), 0, SoundDefOf.Crunch, null, null, null, yieldThing, 1f, yieldAmount, false, null, 0f, 1, 0, false);
+                            MoteMaker.ThrowSmoke(intVec.ToVector3Shifted(), Map, Rand.Range(.6f, 1f));
+                            if (intVec == boltPosition)
                             {
-                                this.wallImpact = true;
-                                this.duration = this.approximateDuration;
+                                wallImpact = true;
+                                duration = approximateDuration;
                             }
                         }
                         else if (structure.def.building.isNaturalRock)
                         {
                             ThingDef yieldThing = structure.def.building.mineableThing;
                             DamageEntities(structure, structure.def.BaseMaxHitPoints, DamageDefOf.Crush);
-                            Vector3 moteDirection = GetVector(this.origin.ToIntVec3(), intVec);
-                            EffectMaker.MakeEffect(ThingDef.Named("Mote_Rubble"), intVec.ToVector3Shifted(), base.Map, Rand.Range(.3f, .5f), (Quaternion.AngleAxis(90, Vector3.up) * moteDirection).ToAngleFlat(), 8f, 0);
-                            EffectMaker.MakeEffect(ThingDef.Named("Mote_Rubble"), intVec.ToVector3Shifted(), base.Map, Rand.Range(.3f, .6f), (Quaternion.AngleAxis(Rand.Range(-70, -110), Vector3.up) * moteDirection).ToAngleFlat(), 6f, 0);
-                            GenExplosion.DoExplosion(intVec, base.Map, .4f, WizardryDefOf.LotRW_RockFragments, this.launcher, Rand.Range(6, 16), 0, SoundDefOf.Crunch, null, null, null, yieldThing, .2f, 1, false, null, 0f, 1, 0, false);
-                            MoteMaker.ThrowSmoke(intVec.ToVector3Shifted(), base.Map, Rand.Range(.6f, 1f));
-                            if (intVec == this.boltPosition)
+                            Vector3 moteDirection = GetVector(origin.ToIntVec3(), intVec);
+                            EffectMaker.MakeEffect(ThingDef.Named("Mote_Rubble"), intVec.ToVector3Shifted(), Map, Rand.Range(.3f, .5f), (Quaternion.AngleAxis(90, Vector3.up) * moteDirection).ToAngleFlat(), 8f, 0);
+                            EffectMaker.MakeEffect(ThingDef.Named("Mote_Rubble"), intVec.ToVector3Shifted(), Map, Rand.Range(.3f, .6f), (Quaternion.AngleAxis(Rand.Range(-70, -110), Vector3.up) * moteDirection).ToAngleFlat(), 6f, 0);
+                            GenExplosion.DoExplosion(intVec, Map, .4f, WizardryDefOf.LotRW_RockFragments, launcher, Rand.Range(6, 16), 0, SoundDefOf.Crunch, null, null, null, yieldThing, .2f, 1, false, null, 0f, 1, 0, false);
+                            MoteMaker.ThrowSmoke(intVec.ToVector3Shifted(), Map, Rand.Range(.6f, 1f));
+                            if (intVec == boltPosition)
                             {
-                                this.wallImpact = true;
-                                this.duration = this.approximateDuration;
+                                wallImpact = true;
+                                duration = approximateDuration;
                             }
                         }
                         else
                         {
                             DamageEntities(structure, Rand.Range(40, 50), DamageDefOf.Crush);
-                            EffectMaker.MakeEffect(ThingDef.Named("Mote_Rubble"), intVec.ToVector3Shifted(), base.Map, Rand.Range(.3f, .6f), Rand.Range(0, 359), 6f, 0);
-                            EffectMaker.MakeEffect(ThingDef.Named("Mote_Rubble"), intVec.ToVector3Shifted(), base.Map, Rand.Range(.3f, .6f), Rand.Range(0, 359), 4f, 0);
-                            MoteMaker.ThrowSmoke(intVec.ToVector3Shifted(), base.Map, Rand.Range(.6f, 1f));
+                            EffectMaker.MakeEffect(ThingDef.Named("Mote_Rubble"), intVec.ToVector3Shifted(), Map, Rand.Range(.3f, .6f), Rand.Range(0, 359), 6f, 0);
+                            EffectMaker.MakeEffect(ThingDef.Named("Mote_Rubble"), intVec.ToVector3Shifted(), Map, Rand.Range(.3f, .6f), Rand.Range(0, 359), 4f, 0);
+                            MoteMaker.ThrowSmoke(intVec.ToVector3Shifted(), Map, Rand.Range(.6f, 1f));
                         }
                     }
 
-                    pawn = intVec.GetFirstPawn(this.Map);
-                    if (pawn != null && pawn != this.caster)
+                    pawn = intVec.GetFirstPawn(Map);
+                    if (pawn != null && pawn != caster)
                     {
                         if (Rand.Chance(.2f))
                         {
@@ -207,17 +207,17 @@ namespace Wizardry
 
         public void DrawStrike(IntVec3 start, Vector3 dest)
         {
-            if (this.boltOrigin != default)
+            if (boltOrigin != default)
             {
-                float magnitude = (this.boltPosition.ToVector3Shifted() - Find.Camera.transform.position).magnitude;
-                if (this.age <= this.duration)
+                float magnitude = (boltPosition.ToVector3Shifted() - Find.Camera.transform.position).magnitude;
+                if (age <= duration)
                 {                    
                     Find.CameraDriver.shaker.DoShake(20 / magnitude);
-                    Graphics.DrawMesh(this.boltMesh, this.boltOrigin.ToVector3ShiftedWithAltitude(AltitudeLayer.Floor), Quaternion.Euler(0f, this.angle, 0f), FadedMaterialPool.FadedVersionOf(MatPool.rendEarthMat7, 1), 0);
+                    Graphics.DrawMesh(boltMesh, boltOrigin.ToVector3ShiftedWithAltitude(AltitudeLayer.Floor), Quaternion.Euler(0f, angle, 0f), FadedMaterialPool.FadedVersionOf(MatPool.rendEarthMat7, 1), 0);
                 }
                 else
                 {
-                    Graphics.DrawMesh(this.boltMesh, this.boltOrigin.ToVector3ShiftedWithAltitude(AltitudeLayer.Floor), Quaternion.Euler(0f, this.angle, 0f), FadedMaterialPool.FadedVersionOf(MatPool.rendEarthMat7, this.MeshBrightness), 0);
+                    Graphics.DrawMesh(boltMesh, boltOrigin.ToVector3ShiftedWithAltitude(AltitudeLayer.Floor), Quaternion.Euler(0f, angle, 0f), FadedMaterialPool.FadedVersionOf(MatPool.rendEarthMat7, MeshBrightness), 0);
                 }                
             }
         }
@@ -226,7 +226,7 @@ namespace Wizardry
         {
             get
             {
-                return 1f - ((float)(this.age - this.duration) / this.fadeTicks);
+                return 1f - ((float)(age - duration) / fadeTicks);
             }
         }
 
@@ -252,7 +252,7 @@ namespace Wizardry
         public override void Tick()
         {
             base.Tick();
-            this.age++;
+            age++;
         }
 
         public Mesh RandomBoltMesh
@@ -260,16 +260,16 @@ namespace Wizardry
             get
             {
                 Mesh result;
-                Aule_Projectile_RendEarth.boltMeshes.Clear();
-                if (Aule_Projectile_RendEarth.boltMeshes.Count < this.boltMaxCount)
+                boltMeshes.Clear();
+                if (boltMeshes.Count < boltMaxCount)
                 {
-                    Mesh mesh = Effect_MeshMaker.NewBoltMesh(this.boltRange, 0);
-                    Aule_Projectile_RendEarth.boltMeshes.Add(mesh);
+                    Mesh mesh = Effect_MeshMaker.NewBoltMesh(boltRange, 0);
+                    boltMeshes.Add(mesh);
                     result = mesh;
                 }
                 else
                 {
-                    result = Aule_Projectile_RendEarth.boltMeshes.RandomElement<Mesh>();
+                    result = boltMeshes.RandomElement<Mesh>();
                 }
                 return result;
             }

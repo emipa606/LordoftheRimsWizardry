@@ -46,27 +46,27 @@ namespace Wizardry
         public override void ExposeData()
         {
             base.ExposeData();
-            Scribe_Values.Look<int>(ref this.circleIndex, "circleIndex", 0, false);
-            Scribe_Values.Look<bool>(ref this.midPoint, "midPoint", false, false);
-            Scribe_Values.Look<bool>(ref this.rainStarted, "rainStarted", false, false);
-            Scribe_Collections.Look<IntVec3>(ref this.rotationCircle, "rotationCircle", LookMode.Value);
-            Scribe_Values.Look<Vector3>(ref this.origin, "origin", default, false);
-            Scribe_Values.Look<Vector3>(ref this.destination, "destination", default, false);
-            Scribe_Values.Look<Vector3>(ref this.trueOrigin, "trueOrigin", default, false);
-            Scribe_Values.Look<int>(ref this.ticksToImpact, "ticksToImpact", 0, false);
-            Scribe_Values.Look<bool>(ref this.damageLaunched, "damageLaunched", true, false);
-            Scribe_Values.Look<bool>(ref this.explosion, "explosion", false, false);
-            Scribe_References.Look<Thing>(ref this.assignedTarget, "assignedTarget", false);
-            Scribe_References.Look<Thing>(ref this.launcher, "launcher", false);
-            Scribe_References.Look<Pawn>(ref this.pawn, "pawn", false);
-            Scribe_References.Look<Thing>(ref this.flyingThing, "flyingThing", false);
+            Scribe_Values.Look<int>(ref circleIndex, "circleIndex", 0, false);
+            Scribe_Values.Look<bool>(ref midPoint, "midPoint", false, false);
+            Scribe_Values.Look<bool>(ref rainStarted, "rainStarted", false, false);
+            Scribe_Collections.Look<IntVec3>(ref rotationCircle, "rotationCircle", LookMode.Value);
+            Scribe_Values.Look<Vector3>(ref origin, "origin", default, false);
+            Scribe_Values.Look<Vector3>(ref destination, "destination", default, false);
+            Scribe_Values.Look<Vector3>(ref trueOrigin, "trueOrigin", default, false);
+            Scribe_Values.Look<int>(ref ticksToImpact, "ticksToImpact", 0, false);
+            Scribe_Values.Look<bool>(ref damageLaunched, "damageLaunched", true, false);
+            Scribe_Values.Look<bool>(ref explosion, "explosion", false, false);
+            Scribe_References.Look<Thing>(ref assignedTarget, "assignedTarget", false);
+            Scribe_References.Look<Thing>(ref launcher, "launcher", false);
+            Scribe_References.Look<Pawn>(ref pawn, "pawn", false);
+            Scribe_References.Look<Thing>(ref flyingThing, "flyingThing", false);
         }
 
         protected int StartingTicksToImpact
         {
             get
             {
-                int num = Mathf.RoundToInt((this.origin - this.destination).magnitude / (this.speed / 100f));
+                int num = Mathf.RoundToInt((origin - destination).magnitude / (speed / 100f));
                 bool flag = num < 1;
                 if (flag)
                 {
@@ -80,7 +80,7 @@ namespace Wizardry
         {
             get
             {
-                return new IntVec3(this.destination);
+                return new IntVec3(destination);
             }
         }
 
@@ -88,8 +88,8 @@ namespace Wizardry
         {
             get
             {
-                Vector3 b = (this.destination - this.origin) * (1f - (float)this.ticksToImpact / (float)this.StartingTicksToImpact);
-                return this.origin + b + Vector3.up * this.def.Altitude;
+                Vector3 b = (destination - origin) * (1f - (float)ticksToImpact / (float)StartingTicksToImpact);
+                return origin + b + Vector3.up * def.Altitude;
             }
         }
 
@@ -97,7 +97,7 @@ namespace Wizardry
         {
             get
             {
-                return Quaternion.LookRotation(this.destination - this.origin);
+                return Quaternion.LookRotation(destination - origin);
             }
         }
 
@@ -105,7 +105,7 @@ namespace Wizardry
         {
             get
             {
-                return this.ExactPosition;
+                return ExactPosition;
             }
         }
 
@@ -117,19 +117,19 @@ namespace Wizardry
                 SoundDefOf.Ambient_AltitudeWind.sustainFadeoutTime.Equals(30.0f);
                 MoteMaker.ThrowDustPuff(pawn.Position, pawn.Map, Rand.Range(1.2f, 1.8f));
             }
-            IEnumerable<IntVec3> innerCircle = GenRadial.RadialCellsAround(this.Position, Mathf.RoundToInt((this.destination - this.trueOrigin).MagnitudeHorizontal()+1), true);
-            IEnumerable<IntVec3> outerCircle = GenRadial.RadialCellsAround(this.Position, Mathf.RoundToInt((this.destination - this.trueOrigin).MagnitudeHorizontal()+2), true);
-            this.rotationCircle = outerCircle.Except(innerCircle).ToList<IntVec3>();
+            IEnumerable<IntVec3> innerCircle = GenRadial.RadialCellsAround(Position, Mathf.RoundToInt((destination - trueOrigin).MagnitudeHorizontal()+1), true);
+            IEnumerable<IntVec3> outerCircle = GenRadial.RadialCellsAround(Position, Mathf.RoundToInt((destination - trueOrigin).MagnitudeHorizontal()+2), true);
+            rotationCircle = outerCircle.Except(innerCircle).ToList<IntVec3>();
         }
 
         public void Launch(Thing launcher, LocalTargetInfo targ, Thing flyingThing, DamageInfo? impactDamage)
         {
-            this.Launch(launcher, base.Position.ToVector3Shifted(), targ, flyingThing, impactDamage);
+            Launch(launcher, Position.ToVector3Shifted(), targ, flyingThing, impactDamage);
         }
 
         public void Launch(Thing launcher, LocalTargetInfo targ, Thing flyingThing)
         {
-            this.Launch(launcher, base.Position.ToVector3Shifted(), targ, flyingThing, null);
+            Launch(launcher, Position.ToVector3Shifted(), targ, flyingThing, null);
         }
 
         public void Launch(Thing launcher, Vector3 origin, LocalTargetInfo targ, Thing flyingThing, DamageInfo? newDamageInfo = null)
@@ -138,68 +138,68 @@ namespace Wizardry
             bool spawned = flyingThing.Spawned;
             pawn = launcher as Pawn;
             drafted = pawn.Drafted;
-            this.Initialize();
+            Initialize();
             if (spawned)
             {
                 flyingThing.DeSpawn();
             }
             this.launcher = launcher;
-            this.trueOrigin = origin;
+            trueOrigin = origin;
             this.origin = origin;
-            this.impactDamage = newDamageInfo;
+            impactDamage = newDamageInfo;
             this.flyingThing = flyingThing;
 
             bool flag = targ.Thing != null;
             if (flag)
             {
-                this.assignedTarget = targ.Thing;
+                assignedTarget = targ.Thing;
             }
-            this.destination = targ.Cell.ToVector3Shifted() + new Vector3(Rand.Range(-0.3f, 0.3f), 0f, Rand.Range(-0.3f, 0.3f));
-            this.ticksToImpact = this.StartingTicksToImpact;
+            destination = targ.Cell.ToVector3Shifted() + new Vector3(Rand.Range(-0.3f, 0.3f), 0f, Rand.Range(-0.3f, 0.3f));
+            ticksToImpact = StartingTicksToImpact;
 
         }
 
         public override void Tick()
         {
             base.Tick();
-            Vector3 exactPosition = this.ExactPosition;
-            this.ticksToImpact--;
-            bool flag = !this.ExactPosition.InBounds(base.Map);
+            Vector3 exactPosition = ExactPosition;
+            ticksToImpact--;
+            bool flag = !ExactPosition.InBounds(Map);
             if (flag)
             {
-                this.ticksToImpact++;
-                base.Position = this.ExactPosition.ToIntVec3();
-                this.Destroy(DestroyMode.Vanish);
+                ticksToImpact++;
+                Position = ExactPosition.ToIntVec3();
+                Destroy(DestroyMode.Vanish);
             }
             else
             {
-                base.Position = this.ExactPosition.ToIntVec3();
+                Position = ExactPosition.ToIntVec3();
                 if (Find.TickManager.TicksGame % rotationRate == 0)
                 {
-                    this.rotation++;
-                    if (this.rotation >= 4)
+                    rotation++;
+                    if (rotation >= 4)
                     {
-                        this.rotation = 0;
+                        rotation = 0;
                     }                   
-                    EffectMaker.MakeEffect(WizardryDefOf.Mote_Sparks, this.DrawPos, this.Map, Rand.Range(.3f,.5f), (this.rotation *90) + Rand.Range(-45, 45), Rand.Range(2, 3), Rand.Range(100, 200));
+                    EffectMaker.MakeEffect(WizardryDefOf.Mote_Sparks, DrawPos, Map, Rand.Range(.3f,.5f), (rotation *90) + Rand.Range(-45, 45), Rand.Range(2, 3), Rand.Range(100, 200));
                 }
 
-                bool flag2 = this.ticksToImpact <= 0;
+                bool flag2 = ticksToImpact <= 0;
                 if (flag2)
                 {
-                    bool flag3 = this.DestinationCell.InBounds(base.Map);
+                    bool flag3 = DestinationCell.InBounds(Map);
                     if (flag3)
                     {
-                        base.Position = this.DestinationCell;
+                        Position = DestinationCell;
                     }
 
                     if(midPoint)
                     {
-                        this.ImpactSomething();
+                        ImpactSomething();
                     }
                     else
                     {
-                        this.ChangeDirection();
+                        ChangeDirection();
                         if(!rainStarted)
                         {
                             StartWeatherEffects();
@@ -212,8 +212,8 @@ namespace Wizardry
 
         private void StartWeatherEffects()
         {
-            Map map = this.Map;
-            this.rainStarted = true;
+            Map map = Map;
+            rainStarted = true;
             WeatherDef rainMakerDef = new WeatherDef();
             if (map.mapTemperature.OutdoorTemp < 0)
             {
@@ -270,84 +270,84 @@ namespace Wizardry
             circleIndex++;
             if(circleIndex >= rotationCircle.Count())
             {
-                this.origin = this.destination;
-                this.destination = this.trueOrigin;
-                this.ticksToImpact = this.StartingTicksToImpact;
-                this.midPoint = true;
+                origin = destination;
+                destination = trueOrigin;
+                ticksToImpact = StartingTicksToImpact;
+                midPoint = true;
             }
             else
             {
-                this.swapVector = this.destination;
-                this.destination = rotationCircle.ToArray<IntVec3>()[circleIndex].ToVector3Shifted();
-                this.origin = this.swapVector;
-                this.ticksToImpact = this.StartingTicksToImpact;
+                swapVector = destination;
+                destination = rotationCircle.ToArray<IntVec3>()[circleIndex].ToVector3Shifted();
+                origin = swapVector;
+                ticksToImpact = StartingTicksToImpact;
             }
         }
 
         public override void Draw()
         {
-            bool flag = this.flyingThing != null;
+            bool flag = flyingThing != null;
             if (flag)
             {                
                 if (rotation == 0)
                 {
-                    this.flyingThing.Rotation = Rot4.West;
+                    flyingThing.Rotation = Rot4.West;
                 }
                 else if (rotation == 1)
                 {
-                    this.flyingThing.Rotation = Rot4.North;
+                    flyingThing.Rotation = Rot4.North;
                 }
                 else if (rotation == 2)
                 {
-                    this.flyingThing.Rotation = Rot4.East;
+                    flyingThing.Rotation = Rot4.East;
                 }
                 else
                 {
-                    this.flyingThing.Rotation = Rot4.South;
+                    flyingThing.Rotation = Rot4.South;
                 }
                 
-                bool flag2 = this.flyingThing is Pawn;
+                bool flag2 = flyingThing is Pawn;
                 if (flag2)
                 {
-                    Vector3 arg_2B_0 = this.DrawPos;
-                    bool flag4 = !this.DrawPos.ToIntVec3().IsValid;
+                    Vector3 arg_2B_0 = DrawPos;
+                    bool flag4 = !DrawPos.ToIntVec3().IsValid;
                     if (flag4)
                     {
                         return;
                     }
-                    Pawn pawn = this.flyingThing as Pawn;
-                    pawn.Drawer.DrawAt(this.DrawPos);
+                    Pawn pawn = flyingThing as Pawn;
+                    pawn.Drawer.DrawAt(DrawPos);
                 }
                 else
                 {
-                    Graphics.DrawMesh(MeshPool.plane10, this.DrawPos, this.ExactRotation, this.flyingThing.def.DrawMatSingle, 0);
+                    Graphics.DrawMesh(MeshPool.plane10, DrawPos, ExactRotation, flyingThing.def.DrawMatSingle, 0);
                 }
             }
             else
             {                
-                Graphics.DrawMesh(MeshPool.plane10, this.DrawPos, this.ExactRotation, this.flyingThing.def.DrawMatSingle, 0);
+                Graphics.DrawMesh(MeshPool.plane10, DrawPos, ExactRotation, flyingThing.def.DrawMatSingle, 0);
             }
-            base.Comps_PostDraw();
+            Comps_PostDraw();
         }
 
         private void ImpactSomething()
         {
-            bool flag = this.assignedTarget != null;
+            bool flag = assignedTarget != null;
             if (flag)
             {
-                bool flag2 = this.assignedTarget is Pawn pawn && pawn.GetPosture() != PawnPosture.Standing && (this.origin - this.destination).MagnitudeHorizontalSquared() >= 20.25f && Rand.Value > 0.2f;
+                bool flag2 = assignedTarget is Pawn pawn && pawn.GetPosture() != PawnPosture.Standing && (origin - destination).MagnitudeHorizontalSquared() >= 20.25f && Rand.Value > 0.2f;
                 if (flag2)
                 {
-                    this.Impact(null);
+                    Impact(null);
                 }
                 else
                 {
-                    this.Impact(this.assignedTarget);
+                    Impact(assignedTarget);
                 }
             }
             else
             {
-                this.Impact(null);
+                Impact(null);
             }
         }
 
@@ -357,25 +357,25 @@ namespace Wizardry
             if (flag)
             {
                 Pawn pawn;
-                bool flag2 = (pawn = (base.Position.GetThingList(base.Map).FirstOrDefault((Thing x) => x == this.assignedTarget) as Pawn)) != null;
+                bool flag2 = (pawn = (Position.GetThingList(Map).FirstOrDefault((Thing x) => x == assignedTarget) as Pawn)) != null;
                 if (flag2)
                 {
                     hitThing = pawn;
                 }
             }
-            bool hasValue = this.impactDamage.HasValue;
+            bool hasValue = impactDamage.HasValue;
             if (hasValue)
             {
-                hitThing.TakeDamage(this.impactDamage.Value);
+                hitThing.TakeDamage(impactDamage.Value);
             }
             SoundDefOf.Ambient_AltitudeWind.sustainFadeoutTime.Equals(30.0f);
-            GenSpawn.Spawn(this.flyingThing, base.Position, base.Map);
-            Pawn p = this.flyingThing as Pawn;
+            GenSpawn.Spawn(flyingThing, Position, Map);
+            Pawn p = flyingThing as Pawn;
             if (p.IsColonist)
             {                    
-                p.drafter.Drafted = this.drafted;
+                p.drafter.Drafted = drafted;
             }
-            this.Destroy(DestroyMode.Vanish);
+            Destroy(DestroyMode.Vanish);
         }
     }
 }

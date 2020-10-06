@@ -17,7 +17,7 @@ namespace Wizardry
 
         public CompProperties_StorageGraphic()
         {
-            this.compClass = typeof(CompStorageGraphic);
+            compClass = typeof(CompStorageGraphic);
         }
     }
 }

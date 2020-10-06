@@ -14,7 +14,7 @@ namespace Wizardry
         {
             get
             {
-                return base.Pawn.GetComp<CompWizardry>();
+                return Pawn.GetComp<CompWizardry>();
             }
         }
 
@@ -22,7 +22,7 @@ namespace Wizardry
         {
             get
             {
-                return base.Def as WizardAbilityDef;
+                return Def as WizardAbilityDef;
             }
         }
 
@@ -91,7 +91,7 @@ namespace Wizardry
             if (flag)
             {
                 reason = "";
-                bool flag2 = base.Def != null && (_ = (base.Def as WizardAbilityDef)) != null;
+                bool flag2 = Def != null && (_ = (Def as WizardAbilityDef)) != null;
                 if (flag2)
                 {
 

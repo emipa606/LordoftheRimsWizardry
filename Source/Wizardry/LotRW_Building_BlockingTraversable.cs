@@ -15,7 +15,7 @@ namespace Wizardry
         public override void Tick()
         {
             base.Tick();
-            if (this.Map != null)
+            if (Map != null)
             {                
                 if (Find.TickManager.TicksGame % 2 == 0)
                 {
@@ -30,16 +30,16 @@ namespace Wizardry
 
         public void DestroyProjectiles()
         {
-            List<Thing> cellList = this.Position.GetThingList(this.Map);
+            List<Thing> cellList = Position.GetThingList(Map);
             for (int i = 0; i < cellList.Count; i++)
             {
                 if (cellList[i] is Projectile && cellList[i].def.defName != "LotRW_Projectile_AirWall")
                 {
-                    Vector3 displayEffect = this.DrawPos;
+                    Vector3 displayEffect = DrawPos;
                     displayEffect.x += Rand.Range(-.3f, .3f);
                     displayEffect.y += Rand.Range(-.3f, .3f);
                     displayEffect.z += Rand.Range(-.3f, .3f);
-                    EffectMaker.MakeEffect(ThingDef.Named("Mote_LightningGlow"), displayEffect, this.Map, cellList[i].def.projectile.GetDamageAmount(1, null)/8f);
+                    EffectMaker.MakeEffect(ThingDef.Named("Mote_LightningGlow"), displayEffect, Map, cellList[i].def.projectile.GetDamageAmount(1, null)/8f);
                     cellList[i].Destroy(DestroyMode.Vanish);
                 }
             }
@@ -51,10 +51,10 @@ namespace Wizardry
             Pawn p = null;
             for (int i = 0; i < num; i++)
             {
-                IntVec3 intVec = this.Position + GenRadial.RadialPattern[i];
-                if (intVec.IsValid && intVec.InBounds(base.Map))
+                IntVec3 intVec = Position + GenRadial.RadialPattern[i];
+                if (intVec.IsValid && intVec.InBounds(Map))
                 {
-                    p = intVec.GetFirstPawn(this.Map);
+                    p = intVec.GetFirstPawn(Map);
                     if(p != null)
                     {
                         HealthUtility.AdjustSeverity(p, HediffDef.Named("LotRW_SlowHD"), .5f);

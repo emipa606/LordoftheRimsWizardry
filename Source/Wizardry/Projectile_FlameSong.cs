@@ -23,12 +23,12 @@ namespace Wizardry
         public override void ExposeData()
         {
             base.ExposeData();
-            Scribe_Values.Look<int>(ref this.age, "age", -1, false);
-            Scribe_Values.Look<int>(ref this.duration, "duration", 5, false);
-            Scribe_Values.Look<int>(ref this.expandingTick, "expandingTick", 0, false);
-            Scribe_Values.Look<float>(ref this.fireAmount, "fireAmount", 20, false);
-            Scribe_Values.Look<bool>(ref this.initialized, "initialized", false, false);
-            Scribe_References.Look<Pawn>(ref this.caster, "caster", false);
+            Scribe_Values.Look<int>(ref age, "age", -1, false);
+            Scribe_Values.Look<int>(ref duration, "duration", 5, false);
+            Scribe_Values.Look<int>(ref expandingTick, "expandingTick", 0, false);
+            Scribe_Values.Look<float>(ref fireAmount, "fireAmount", 20, false);
+            Scribe_Values.Look<bool>(ref initialized, "initialized", false, false);
+            Scribe_References.Look<Pawn>(ref caster, "caster", false);
         }
 
         protected override void Impact(Thing hitThing)
@@ -40,8 +40,8 @@ namespace Wizardry
             }
             ThingDef def = this.def;
             Map map = caster.Map;
-            this.expandingTick++;
-            IntVec3 centerCell = base.Position;
+            expandingTick++;
+            IntVec3 centerCell = Position;
             IntVec3 curCell;
             IEnumerable<IntVec3> oldExplosionCells = GenRadial.RadialCellsAround(centerCell, expandingTick - 1, true);
             IEnumerable<IntVec3> newExplosionCells = GenRadial.RadialCellsAround(centerCell, expandingTick, true);
@@ -64,7 +64,7 @@ namespace Wizardry
                         DamageEntities(burnThing);
                     }
                     //GenExplosion.DoExplosion(this.currentPos.ToIntVec3(), this.Map, .4f, DamageDefOf.Flame, this.launcher, 10, SoundDefOf.ArtilleryShellLoaded, def, this.equipmentDef, null, 0f, 1, false, null, 0f, 1, 0f, false);
-                    if (Rand.Chance(this.fireStartChance))
+                    if (Rand.Chance(fireStartChance))
                     {
                         FireUtility.TryStartFireIn(curCell, map, Rand.Range(.1f, .35f));
                     }
@@ -74,15 +74,15 @@ namespace Wizardry
 
         private void Initialize()
         {
-            this.caster = this.launcher as Pawn;
-            this.duration = Mathf.RoundToInt(this.def.projectile.explosionRadius);
-            this.age = 0;
-            this.initialized = true;            
+            caster = launcher as Pawn;
+            duration = Mathf.RoundToInt(def.projectile.explosionRadius);
+            age = 0;
+            initialized = true;            
         }
 
         public void DamageEntities(Thing e)
         {            
-            int amt = Mathf.RoundToInt(Rand.Range(this.def.projectile.GetDamageAmount(1, null) * .75f, this.def.projectile.GetDamageAmount(1, null) * 1.25f) + this.fireAmount);
+            int amt = Mathf.RoundToInt(Rand.Range(def.projectile.GetDamageAmount(1, null) * .75f, def.projectile.GetDamageAmount(1, null) * 1.25f) + fireAmount);
             DamageInfo dinfo = new DamageInfo(DamageDefOf.Flame, amt, 0, (float)-1, null, null, null, DamageInfo.SourceCategory.ThingOrUnknown);
             bool flag = e != null;
             if (flag)
@@ -94,12 +94,12 @@ namespace Wizardry
         public override void Tick()
         {
             base.Tick();
-            this.age++;
+            age++;
         }
 
         public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
         {
-            bool flag = this.age < duration;
+            bool flag = age < duration;
             if (!flag && initialized)
             {
                 base.Destroy(mode);

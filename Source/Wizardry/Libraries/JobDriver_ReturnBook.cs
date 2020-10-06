@@ -12,7 +12,7 @@ namespace Wizardry
         // Token: 0x060002A5 RID: 677 RVA: 0x00018AF3 File Offset: 0x00016EF3
         public JobDriver_ReturnBook()
         {
-            this.rotateToFace = TargetIndex.B;
+            rotateToFace = TargetIndex.B;
         }
 
         // Token: 0x1700008D RID: 141
@@ -21,7 +21,7 @@ namespace Wizardry
         {
             get
             {
-                return (ThingBook)this.job.GetTarget(TargetIndex.A).Thing;
+                return (ThingBook)job.GetTarget(TargetIndex.A).Thing;
             }
         }
 
@@ -31,14 +31,14 @@ namespace Wizardry
         {
             get
             {
-                return (Building_InternalStorage)this.job.GetTarget(TargetIndex.B).Thing;
+                return (Building_InternalStorage)job.GetTarget(TargetIndex.B).Thing;
             }
         }
 
         // Token: 0x060002A8 RID: 680 RVA: 0x00018B54 File Offset: 0x00016F54
         public override bool TryMakePreToilReservations(bool baa)
         {
-            return this.pawn.Reserve(this.Book, this.job, 1, -1, null) && this.pawn.Reserve(this.Book, this.job, 1, -1, null);
+            return pawn.Reserve(Book, job, 1, -1, null) && pawn.Reserve(Book, job, 1, -1, null);
         }
 
         // Token: 0x060002A9 RID: 681 RVA: 0x00018BA8 File Offset: 0x00016FA8
@@ -46,7 +46,7 @@ namespace Wizardry
         {
             this.FailOnDestroyedNullOrForbidden(TargetIndex.A);
             this.FailOnDestroyedNullOrForbidden(TargetIndex.B);
-            this.FailOn(() => !this.Storage.Accepts(this.Book));
+            this.FailOn(() => !Storage.Accepts(Book));
             yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch).FailOnSomeonePhysicallyInteracting(TargetIndex.A);
             yield return Toils_Haul.StartCarryThing(TargetIndex.A, false, false, false);
             yield return Toils_Haul.CarryHauledThingToContainer();
@@ -57,26 +57,26 @@ namespace Wizardry
             {
                 initAction = delegate
                 {
-                    if (this.pawn.carryTracker.CarriedThing == null)
+                    if (pawn.carryTracker.CarriedThing == null)
 					{
-                        Log.Error(this.pawn + " tried to place hauled corpse in grave but is not hauling anything.");
+                        Log.Error(pawn + " tried to place hauled corpse in grave but is not hauling anything.");
                         return;
                     }
-                    if (this.Storage.Accepts(this.Book))
+                    if (Storage.Accepts(Book))
 					{
                         bool flag = false;
                         if (Book.holdingOwner != null)
                         {
-                            Book.holdingOwner.TryTransferToContainer(Book, this.Storage.TryGetInnerInteractableThingOwner(), Book.stackCount, true);
+                            Book.holdingOwner.TryTransferToContainer(Book, Storage.TryGetInnerInteractableThingOwner(), Book.stackCount, true);
                             flag = true;
                         }
                         else
                         {
-                            flag = this.Storage.TryGetInnerInteractableThingOwner().TryAdd(Book, true);
+                            flag = Storage.TryGetInnerInteractableThingOwner().TryAdd(Book, true);
                         }
                         Storage.CompStorageGraphic.UpdateGraphics();
-                        this.pawn.carryTracker.innerContainer.Remove(this.Book);
-                        this.pawn.records.Increment(RecordDefOf.CorpsesBuried);
+                        pawn.carryTracker.innerContainer.Remove(Book);
+                        pawn.records.Increment(RecordDefOf.CorpsesBuried);
                     }
                 }
             };

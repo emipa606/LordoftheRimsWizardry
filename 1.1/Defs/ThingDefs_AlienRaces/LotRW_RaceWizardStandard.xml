@@ -43,6 +43,7 @@
           <bodyAddons>
             <li>
               <path>Things/Istard/Istard</path>
+              <drawForFemale>false</drawForFemale>
               <bodyPart>Head</bodyPart>
               <inFrontOfBody>true</inFrontOfBody>
               <layerOffset>-0.275</layerOffset>

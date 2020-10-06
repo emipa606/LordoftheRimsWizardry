@@ -43,7 +43,7 @@ namespace Wizardry
             {
                 return null;
             }
-            Building_InternalStorage Building_InternalStorage = this.FindBestStorage(pawn, book);
+            Building_InternalStorage Building_InternalStorage = FindBestStorage(pawn, book);
             if (Building_InternalStorage == null)
             {
                 JobFailReason.Is("NoEmptyGraveLower".Translate());

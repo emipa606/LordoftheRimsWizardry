@@ -62,7 +62,7 @@ namespace Wizardry
                     {
                         lookAngle = (Quaternion.AngleAxis(90, Vector3.up) * GetVector(loc.ToIntVec3(), intVec)).ToAngleFlat();
                     }
-                    EffectMaker.MakeEffect(mote, intVec.ToVector3Shifted(), map, scale, directionAngle, velocity, rotationRate, lookAngle, solidTime, fadeIn, fadeOut, false);
+                    MakeEffect(mote, intVec.ToVector3Shifted(), map, scale, directionAngle, velocity, rotationRate, lookAngle, solidTime, fadeIn, fadeOut, false);
                 }
             }
         }

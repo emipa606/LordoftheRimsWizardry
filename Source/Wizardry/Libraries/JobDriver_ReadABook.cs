@@ -11,12 +11,12 @@ namespace Wizardry
     {
         public override bool TryMakePreToilReservations(bool add)
         {
-            return this.pawn.Reserve(this.job.GetTarget(TargetIndex.A), this.job, 1, -1, null);
+            return pawn.Reserve(job.GetTarget(TargetIndex.A), job, 1, -1, null);
         }
 
         public override bool ModifyCarriedThingDrawPos(ref Vector3 drawPos, ref bool behind, ref bool flip)
         {
-            if (this.pawn.Rotation == Rot4.East)
+            if (pawn.Rotation == Rot4.East)
             {
                 drawPos += new Vector3(0.6f, 0, 0);
                 flip = true;
@@ -26,7 +26,7 @@ namespace Wizardry
                 drawPos -= new Vector3(0.6f, 0, 0);
                 flip = false;
             }
-            if (this.pawn.Rotation == Rot4.North)
+            if (pawn.Rotation == Rot4.North)
             {
                 behind = true;
             }
@@ -39,9 +39,9 @@ namespace Wizardry
 
         protected void ReadTickAction()
         {
-            this.pawn.rotationTracker.FaceCell(base.TargetB.Cell);
+            this.pawn.rotationTracker.FaceCell(TargetB.Cell);
             this.pawn.GainComfortFromCellIfPossible();
-            float statValue = base.TargetThingA.GetStatValue(StatDefOf.JoyGainFactor, true);
+            float statValue = TargetThingA.GetStatValue(StatDefOf.JoyGainFactor, true);
             Pawn pawn = this.pawn;
             float extraJoyGainFactor = statValue;
             JoyUtility.JoyTickCheckEnd(pawn, JoyTickFullJoyAction.EndJob, extraJoyGainFactor);
@@ -61,18 +61,18 @@ namespace Wizardry
                         Thing book = null;
                         if (bld.TryDropRandom(out book))
                         {
-                            this.job.SetTarget(TargetIndex.B, book as ThingBook);
+                            job.SetTarget(TargetIndex.B, book as ThingBook);
                         }
                     }
                 }
             };
             yield return Toils_Reserve.Reserve(TargetIndex.B);
-            yield return Toils_Ingest.PickupIngestible(TargetIndex.B, this.pawn);
-            yield return JobDriver_ReadABook.CarryBookToReadSpot(this.pawn, TargetIndex.B);
+            yield return Toils_Ingest.PickupIngestible(TargetIndex.B, pawn);
+            yield return CarryBookToReadSpot(pawn, TargetIndex.B);
             yield return Toils_Ingest.FindAdjacentEatSurface(TargetIndex.C, TargetIndex.B);
-            Toil wait = Toils_General.Wait(this.job.def.joyDuration);
+            Toil wait = Toils_General.Wait(job.def.joyDuration);
             wait.FailOnCannotTouch(TargetIndex.B, PathEndMode.Touch);
-            wait.tickAction = this.ReadTickAction;
+            wait.tickAction = ReadTickAction;
             yield return wait;
             yield return Toils_Reserve.Release(TargetIndex.B);
             yield break;
