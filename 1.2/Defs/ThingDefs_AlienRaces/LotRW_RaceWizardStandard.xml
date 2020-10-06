@@ -30,6 +30,7 @@
         <humanRecipeImport>true</humanRecipeImport>
         <allowHumanBios>false</allowHumanBios>
         <immuneToAge>true</immuneToAge>
+        <maleGenderProbability>1</maleGenderProbability>
         <alienPartGenerator>
           <alienbodytypes>
             <li>Male</li>
