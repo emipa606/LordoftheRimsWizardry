@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Defs>
-  <FactionDef Abstract="True" Name="EntFactionBase">
+  <FactionDef Abstract="True" Name="WizardFactionBase">
     <settlementTexturePath>World/WorldObjects/DefaultFactionBase</settlementTexturePath>
     <colorSpectrum>
       <li>(1, 1, 1)</li>
@@ -9,7 +9,7 @@
       <li>Rural</li>
     </hairTags>
   </FactionDef>
-  <FactionDef ParentName="EntFactionBase">
+  <FactionDef ParentName="WizardFactionBase">
     <defName>WizardPlayerFaction</defName>
     <label>One Wizard</label>
     <description>Your own faction.</description>

@@ -15,7 +15,7 @@
           </pawnKindEntries>
           <factionDefs>
             <li>PlayerColony</li>
-            <li>LotRPlayerColony</li>
+            <li>WizardPlayerFaction</li>
           </factionDefs>
         </li>
       </startingColonists>

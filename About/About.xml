@@ -34,17 +34,29 @@
     <li>erdelf.HumanoidAlienRaces</li>
     <li>CETeam.CombatExtended</li>
   </loadAfter>
-  <description>Update of Jecrells mod
+  <description>[img]https://i.imgur.com/WAEzk68.png[/img]
+Update of Jecrells mod
 https://github.com/Lord-of-the-Rims-DevTeam/Lord-of-the-Rims---Wizardry
 
-[img]https://i.imgur.com/GYswkZ7.png[/img]
+- Added support for Combat Extended
+- Added start-scenario
+- Fixed healing beam to be autoused in teh same way as normal healing
+- Set beards only for males
+- Fixed starting-goodwill with Empire
 
-Support-chat:
-https://invite.gg/mlie
+The mod adds Wizards as possible colonists. 
+They are as powerful as you would imagine but a wizard knows to use their abilities only when needed.
 
-Non-steam version:
-https://github.com/emipa606/LordoftheRimsWizardry
+[img]https://i.imgur.com/7Gzt3Rg.png[/img]
+
+[table]
+	[tr]
+		[td][url=https://invite.gg/Mlie][img]https://i.imgur.com/zdzzBrc.png[/img][/url][/td]
+		[td][url=https://github.com/emipa606/LordoftheRimsWizardry][img]https://i.imgur.com/kTkpTOE.png[/img][/url][/td]
+	[/tr]
+[/table]
 	
---- Original Description ---
+[img]https://i.imgur.com/NOW7jU1.png[/img]
+
 Adds Wizardry from Lord of the Rings into RimWorld.</description>
 </ModMetaData>
