@@ -1,26 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using RimWorld;
 using Verse;
 using Verse.AI;
-using RimWorld;
-using System.Linq;
 
 namespace Wizardry
 {
     public class WorkGiver_ReturnBooks : WorkGiver_Scanner
     {
+        public override PathEndMode PathEndMode => PathEndMode.ClosestTouch;
 
         public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn)
         {
             return pawn.Map.listerThings.AllThings.FindAll(x => x is ThingBook);
-        }
-
-        public override PathEndMode PathEndMode
-        {
-            get
-            {
-                return PathEndMode.ClosestTouch;
-            }
         }
 
         public override bool ShouldSkip(Pawn pawn, bool forced = false)
@@ -39,40 +31,52 @@ namespace Wizardry
             {
                 return null;
             }
+
             if (!HaulAIUtility.PawnCanAutomaticallyHaul(pawn, t, forced))
             {
                 return null;
             }
-            Building_InternalStorage Building_InternalStorage = FindBestStorage(pawn, book);
-            if (Building_InternalStorage == null)
+
+            var Building_InternalStorage = FindBestStorage(pawn, book);
+            if (Building_InternalStorage != null)
             {
-                JobFailReason.Is("NoEmptyGraveLower".Translate());
-                return null;
+                return new Job(DefDatabase<JobDef>.GetNamed("Estate_ReturnBook"), t, Building_InternalStorage)
+                {
+                    count = book.stackCount
+                };
             }
-            return new Job(DefDatabase<JobDef>.GetNamed("Estate_ReturnBook"), t, Building_InternalStorage)
-            {
-                count = book.stackCount
-            };
+
+            JobFailReason.Is("NoEmptyGraveLower".Translate());
+            return null;
         }
 
         private Building_InternalStorage FindBestStorage(Pawn p, ThingBook book)
         {
-            Predicate<Thing> predicate = (Thing m) => !m.IsForbidden(p) && p.CanReserveNew(m) && ((Building_InternalStorage)m).Accepts(book);
-            Func<Thing, float> priorityGetter = delegate (Thing t)
+            bool Predicate(Thing m)
             {
-                float result = 0f;
-                result += (float)((IStoreSettingsParent)t).GetStoreSettings().Priority;
+                return !m.IsForbidden(p) && p.CanReserveNew(m) && ((Building_InternalStorage) m).Accepts(book);
+            }
+
+            float PriorityGetter(Thing t)
+            {
+                var result = 0f;
+                result += (float) ((IStoreSettingsParent) t).GetStoreSettings().Priority;
                 if (t is Building_InternalStorage bS && bS.TryGetInnerInteractableThingOwner()?.Count > 0)
+                {
                     result -= bS.TryGetInnerInteractableThingOwner().Count;
+                }
+
                 return result;
-            };
-            IntVec3 position = book.Position;
-            Map map = book.Map;
-            List<Thing> searchSet = book.Map.listerThings.AllThings.FindAll(x => x is Building_InternalStorage);
-            PathEndMode peMode = PathEndMode.ClosestTouch;
-            TraverseParms traverseParams = TraverseParms.For(p, Danger.Deadly, TraverseMode.ByPawn, false);
-            Predicate<Thing> validator = predicate;
-            return (Building_InternalStorage)GenClosest.ClosestThing_Global_Reachable(position, map, searchSet, peMode, traverseParams, 9999f, validator, priorityGetter);
+            }
+
+            var position = book.Position;
+            var map = book.Map;
+            var searchSet = book.Map.listerThings.AllThings.FindAll(x => x is Building_InternalStorage);
+            var peMode = PathEndMode.ClosestTouch;
+            var traverseParams = TraverseParms.For(p);
+            var validator = (Predicate<Thing>) Predicate;
+            return (Building_InternalStorage) GenClosest.ClosestThing_Global_Reachable(position, map, searchSet, peMode,
+                traverseParams, 9999f, validator, PriorityGetter);
         }
     }
 }

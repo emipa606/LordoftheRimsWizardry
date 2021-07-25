@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-
-using UnityEngine;
-//using VerseBase;
+using RimWorld;
 using Verse;
 using Verse.AI;
-using Verse.Sound;
-using RimWorld;
+//using VerseBase;
 
 namespace Wizardry
 {
@@ -26,20 +20,22 @@ namespace Wizardry
         [DebuggerHidden]
         protected override IEnumerable<Toil> MakeNewToils()
         {
-            this.EndOnDespawnedOrNull(TargetIndex.A, JobCondition.Incompletable);
+            this.EndOnDespawnedOrNull(TargetIndex.A);
             yield return Toils_Reserve.Reserve(TargetIndex.A, job.def.joyMaxParticipants);
             if (TargetB != null)
-                yield return Toils_Reserve.Reserve(TargetIndex.B, 1);
+            {
+                yield return Toils_Reserve.Reserve(TargetIndex.B);
+            }
+
             yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.OnCell);
-            Toil toil = new Toil();
+            var toil = new Toil();
             toil.PlaySustainerOrSound(DefDatabase<SoundDef>.GetNamed("Estate_SoundManualTypewriter"));
             toil.tickAction = delegate
             {
                 pawn.rotationTracker.FaceCell(TargetA.Cell);
                 pawn.GainComfortFromCellIfPossible();
-                float statValue = TargetThingA.GetStatValue(StatDefOf.JoyGainFactor, true);
-                float extraJoyGainFactor = statValue;
-                JoyUtility.JoyTickCheckEnd(pawn, JoyTickFullJoyAction.EndJob, extraJoyGainFactor);
+                var statValue = TargetThingA.GetStatValue(StatDefOf.JoyGainFactor);
+                JoyUtility.JoyTickCheckEnd(pawn, JoyTickFullJoyAction.EndJob, statValue);
             };
             toil.defaultCompleteMode = ToilCompleteMode.Delay;
             toil.defaultDuration = job.def.joyDuration;
@@ -64,8 +60,6 @@ namespace Wizardry
 //                JoyUtility.TryGainRecRoomThought(this.pawn);
 //            });
             yield return toil;
-            yield break;
         }
     }
-
 }

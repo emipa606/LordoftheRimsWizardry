@@ -1,24 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using Verse;
 using RimWorld;
-using Verse.AI;
 using UnityEngine;
-using AbilityUser;
+using Verse;
+using Verse.AI;
 
 namespace Wizardry
 {
     internal class Nienna_JobDriver_HealingTouch : JobDriver
     {
         private const TargetIndex caster = TargetIndex.B;
+        private readonly bool issueJobAgain = false;
+        private readonly int ticksTillNextHeal = 30;
 
-        int age = -1;
-        int lastHeal = 0;
-        readonly int ticksTillNextHeal = 30;
+        private int age = -1;
         public int duration = 1200;
-        int injuryCount = 0;
-        readonly bool issueJobAgain = false;
+        private int injuryCount;
+        private int lastHeal;
 
         public override bool TryMakePreToilReservations(bool errorOnFailed)
         {
@@ -26,131 +24,153 @@ namespace Wizardry
             {
                 return true;
             }
+
             return false;
         }
 
         protected override IEnumerable<Toil> MakeNewToils()
         {
-            Pawn patient = TargetA.Thing as Pawn;
-            Toil gotoPatient = new Toil()
+            var patient = TargetA.Thing as Pawn;
+            var gotoPatient = new Toil
             {
-                initAction = () =>
-                {
-                    pawn.pather.StartPath(TargetA, PathEndMode.Touch);
-                },
+                initAction = () => { pawn.pather.StartPath(TargetA, PathEndMode.Touch); },
                 defaultCompleteMode = ToilCompleteMode.PatherArrival
             };
             yield return gotoPatient;
-            Toil doHealing = new Toil();
-            doHealing.initAction = delegate
+            var doHealing = new Toil
             {
-                if (age > duration)
+                initAction = delegate
                 {
-                    EndJobWith(JobCondition.Succeeded);
-                }
-                if (patient.DestroyedOrNull() || patient.Dead)
-                {
-                    EndJobWith(JobCondition.Incompletable);
-                }
-            };
-            doHealing.tickAction = delegate
-            {
-                if(patient.DestroyedOrNull() || patient.Dead)
-                {
-                    EndJobWith(JobCondition.Incompletable);
-                }
-                if(Find.TickManager.TicksGame % 1 ==0)
-                {
-                    EffectMaker.MakeEffect(ThingDef.Named("Mote_HealingMote"), pawn.DrawPos, Map, Rand.Range(.3f, .5f), (Quaternion.AngleAxis(90, Vector3.up) * GetVector(pawn.Position, patient.Position)).ToAngleFlat() + Rand.Range(-10,10), 5f, 0);
-
-                }
-                if (age > (lastHeal + ticksTillNextHeal))
-                {
-                    DoHealingEffect(patient);
-                    EffectMaker.MakeEffect(ThingDef.Named("Mote_HealingCircles"), patient.DrawPos, Map, Rand.Range(.3f, .4f), 0, 0, Rand.Range(400, 500), Rand.Range(0, 360), .08f, .01f, .24f, false);
-                    lastHeal = age;
-                    if(injuryCount == 0)
+                    if (age > duration)
                     {
                         EndJobWith(JobCondition.Succeeded);
                     }
-                }
-                if (!patient.Drafted && patient.CurJobDef != JobDefOf.Wait)
-                {
-                    if (patient.jobs.posture == PawnPosture.Standing)
+
+                    if (patient != null && (patient.DestroyedOrNull() || patient.Dead))
                     {
-                        Job job = new Job(JobDefOf.Wait, patient);
-                        patient.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+                        EndJobWith(JobCondition.Incompletable);
                     }
-                }
-                age++;
-                ticksLeftThisToil = duration - age;
-                if (age > duration)
+                },
+                tickAction = delegate
                 {
-                    EndJobWith(JobCondition.Succeeded);
-                }
+                    if (patient != null && (patient.DestroyedOrNull() || patient.Dead))
+                    {
+                        EndJobWith(JobCondition.Incompletable);
+                    }
+
+                    if (Find.TickManager.TicksGame % 1 == 0)
+                    {
+                        if (patient != null)
+                        {
+                            EffectMaker.MakeEffect(ThingDef.Named("Mote_HealingMote"), pawn.DrawPos, Map,
+                                Rand.Range(.3f, .5f),
+                                (Quaternion.AngleAxis(90, Vector3.up) * GetVector(pawn.Position, patient.Position))
+                                .ToAngleFlat() + Rand.Range(-10, 10), 5f, 0);
+                        }
+                    }
+
+                    if (age > lastHeal + ticksTillNextHeal)
+                    {
+                        DoHealingEffect(patient);
+                        if (patient != null)
+                        {
+                            EffectMaker.MakeEffect(ThingDef.Named("Mote_HealingCircles"), patient.DrawPos, Map,
+                                Rand.Range(.3f, .4f), 0, 0, Rand.Range(400, 500), Rand.Range(0, 360), .08f, .01f, .24f,
+                                false);
+                        }
+
+                        lastHeal = age;
+                        if (injuryCount == 0)
+                        {
+                            EndJobWith(JobCondition.Succeeded);
+                        }
+                    }
+
+                    if (patient is {Drafted: false} && patient.CurJobDef != JobDefOf.Wait)
+                    {
+                        if (patient.jobs.posture == PawnPosture.Standing)
+                        {
+                            var job1 = new Job(JobDefOf.Wait, patient);
+                            patient.jobs.TryTakeOrderedJob(job1, JobTag.Misc);
+                        }
+                    }
+
+                    age++;
+                    ticksLeftThisToil = duration - age;
+                    if (age > duration)
+                    {
+                        EndJobWith(JobCondition.Succeeded);
+                    }
+                },
+                defaultCompleteMode = ToilCompleteMode.Delay,
+                defaultDuration = duration
             };
-            doHealing.defaultCompleteMode = ToilCompleteMode.Delay;
-            doHealing.defaultDuration = duration;
             doHealing.WithProgressBar(TargetIndex.B, delegate
             {
                 if (pawn.DestroyedOrNull() || pawn.Dead)
                 {
                     return 1f;
                 }
-                return 1f - (float)doHealing.actor.jobs.curDriver.ticksLeftThisToil / duration;
 
+                return 1f - ((float) doHealing.actor.jobs.curDriver.ticksLeftThisToil / duration);
             }, false, 0f);
             doHealing.AddFinishAction(delegate
             {
-                CompWizardry comp = pawn.GetComp<CompWizardry>();
-                PawnAbility pawnAbility = comp.AbilityData.Powers.FirstOrDefault((PawnAbility x) => x.Def == WizardryDefOf.LotRW_Nienna_HealingTouch);
-                pawnAbility.PostAbilityAttempt();
-                patient.jobs.EndCurrentJob(JobCondition.Succeeded, true);
+                var comp = pawn.GetComp<CompWizardry>();
+                var pawnAbility =
+                    comp.AbilityData.Powers.FirstOrDefault(x => x.Def == WizardryDefOf.LotRW_Nienna_HealingTouch);
+                pawnAbility?.PostAbilityAttempt();
+                patient?.jobs.EndCurrentJob(JobCondition.Succeeded);
             });
             yield return doHealing;
         }
 
         private void DoHealingEffect(Pawn patient)
         {
-            int num = 1;
-            injuryCount = 0; 
-            using (IEnumerator<BodyPartRecord> enumerator = patient.health.hediffSet.GetInjuredParts().GetEnumerator())
+            var num = 1;
+            injuryCount = 0;
+            using var enumerator = patient.health.hediffSet.GetInjuredParts().GetEnumerator();
+            while (enumerator.MoveNext())
             {
-                while (enumerator.MoveNext())
+                var rec = enumerator.Current;
+                var num2 = 1;
+                if (num <= 0)
                 {
-                    BodyPartRecord rec = enumerator.Current;
-                    bool flag2 = num > 0;
-                    int num2 = 1;
-                    if (flag2)
+                    continue;
+                }
+
+                var arg_BB_0 = patient.health.hediffSet.GetHediffs<Hediff_Injury>();
+
+                bool ArgBb1(Hediff_Injury injury)
+                {
+                    return injury.Part == rec;
+                }
+
+                foreach (var current in arg_BB_0.Where(ArgBb1))
+                {
+                    if (num2 <= 0)
                     {
-                        IEnumerable<Hediff_Injury> arg_BB_0 = patient.health.hediffSet.GetHediffs<Hediff_Injury>();
-                        Func<Hediff_Injury, bool> arg_BB_1;                        
-                        arg_BB_1 = ((Hediff_Injury injury) => injury.Part == rec);                        
-                        foreach (Hediff_Injury current in arg_BB_0.Where(arg_BB_1))
-                        {
-                            bool flag3 = num2 > 0;
-                            if (flag3)
-                            {
-                                bool flag5 = current.CanHealNaturally() && !current.IsPermanent();
-                                if (flag5)
-                                {
-                                    injuryCount++;
-                                    current.Heal(Rand.Range(1f, 2f));
-                                    num--;
-                                    num2--;
-                                }
-                            }
-                        }
+                        continue;
                     }
+
+                    if (!current.CanHealNaturally() || current.IsPermanent())
+                    {
+                        continue;
+                    }
+
+                    injuryCount++;
+                    current.Heal(Rand.Range(1f, 2f));
+                    num--;
+                    num2--;
                 }
             }
         }
 
         public Vector3 GetVector(IntVec3 center, IntVec3 objectPos)
         {
-            Vector3 heading = (objectPos - center).ToVector3();
-            float distance = heading.magnitude;
-            Vector3 direction = heading / distance;
+            var heading = (objectPos - center).ToVector3();
+            var distance = heading.magnitude;
+            var direction = heading / distance;
             return direction;
         }
     }

@@ -1,11 +1,7 @@
-﻿using System;
-using AbilityUser;
-using Verse;
+﻿using AbilityUser;
 using RimWorld;
+using Verse;
 using Verse.AI;
-using System.Collections.Generic;
-using UnityEngine;
-using System.Linq;
 
 namespace Wizardry
 {
@@ -15,11 +11,11 @@ namespace Wizardry
         {
             if (currentTarget.Thing is Pawn)
             {
-                Pawn pawn = CasterPawn;
+                var pawn = CasterPawn;
 
                 if (!pawn.DestroyedOrNull() && !pawn.Dead && pawn.RaceProps.IsFlesh)
                 {
-                    Job job = new Job(WizardryDefOf.JobDriver_HealingTouch, currentTarget, pawn);                  
+                    var job = new Job(WizardryDefOf.JobDriver_HealingTouch, currentTarget, pawn);
                     pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
                 }
                 else
@@ -31,6 +27,7 @@ namespace Wizardry
             {
                 Messages.Message("invalid target for healing touch", MessageTypeDefOf.RejectInput);
             }
+
             Ability.PostAbilityAttempt();
             burstShotsLeft = 0;
             return false;

@@ -1,8 +1,6 @@
-﻿using RimWorld;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Text;
+using RimWorld;
 using UnityEngine;
 using Verse;
 
@@ -12,57 +10,66 @@ namespace Wizardry
     {
         public override string GetInspectString()
         {
-            StringBuilder s = new StringBuilder();
-            string baseStr = base.GetInspectString();
+            var s = new StringBuilder();
+            var baseStr = base.GetInspectString();
             if (baseStr != "")
+            {
                 s.AppendLine(baseStr);
+            }
+
             if (innerContainer.Count > 0)
+            {
                 s.AppendLine("Estate_ContainsXBooks".Translate(innerContainer.Count));
+            }
+
             s.AppendLine("Estate_XSlotsForBooks".Translate(CompStorageGraphic.Props.countFullCapacity));
             return s.ToString().TrimEndNewlines();
         }
 
         public override IEnumerable<Gizmo> GetGizmos()
         {
-            foreach (Gizmo g in base.GetGizmos())
+            foreach (var g in base.GetGizmos())
+            {
                 yield return g;
+            }
+
             if (innerContainer.Count > 0)
             {
-                yield return new Command_Action()
+                yield return new Command_Action
                 {
-                  defaultLabel = "Estate_RetrieveBook".Translate(),
-                  icon = ContentFinder<Texture2D>.Get("UI/Commands/LaunchReport", true),
-                  defaultDesc = "Estate_RetrieveBookDesc".Translate(),
-                  action = delegate
-                  {
-                      ProcessInput();
-                  }
-                    
-    
+                    defaultLabel = "Estate_RetrieveBook".Translate(),
+                    icon = ContentFinder<Texture2D>.Get("UI/Commands/LaunchReport"),
+                    defaultDesc = "Estate_RetrieveBookDesc".Translate(),
+                    action = ProcessInput
                 };
             }
         }
 
         public void ProcessInput()
         {
-
-            List<FloatMenuOption> list = new List<FloatMenuOption>();
-            Map map = Map;
+            var list = new List<FloatMenuOption>();
+            var unused = Map;
             if (innerContainer.Count != 0)
             {
-                foreach (ThingBook current in innerContainer)
+                foreach (var thing in innerContainer)
                 {
-                    string text = current.Label;
-                    if (current.TryGetComp<CompArt>() is CompArt compArt)
-                        text = "Estate_BookTitle".Translate(new object[] { compArt.Title, compArt.AuthorName });
-                    List<FloatMenuOption> arg_121_0 = list;
-                    Func<Rect, bool> extraPartOnGUI = (Rect rect) => Widgets.InfoCardButton(rect.x + 5f, rect.y + (rect.height - 24f) / 2f, current);
-                    arg_121_0.Add(new FloatMenuOption(text, delegate
+                    var current = (ThingBook) thing;
+                    var text = current.Label;
+                    if (current.TryGetComp<CompArt>() is { } compArt)
                     {
-                        TryDrop(current);
-                    }, MenuOptionPriority.Default, null, null, 29f, extraPartOnGUI, null));
+                        text = "Estate_BookTitle".Translate(compArt.Title, compArt.AuthorName);
+                    }
+
+                    bool ExtraPartOnGui(Rect rect)
+                    {
+                        return Widgets.InfoCardButton(rect.x + 5f, rect.y + ((rect.height - 24f) / 2f), current);
+                    }
+
+                    list.Add(new FloatMenuOption(text, delegate { TryDrop(current); }, MenuOptionPriority.Default,
+                        null, null, 29f, ExtraPartOnGui));
                 }
             }
+
             Find.WindowStack.Add(new FloatMenu(list));
         }
     }

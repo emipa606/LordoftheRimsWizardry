@@ -1,41 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using RimWorld;
-using Verse;
+﻿using System.Text;
 using AbilityUser;
+using Verse;
 
 namespace Wizardry
 {
     public class PawnAbilityAttunement : PawnAbility
     {
-        public CompWizardry Wizard
-        {
-            get
-            {
-                return Pawn.GetComp<CompWizardry>();
-            }
-        }
-
-        public WizardAbilityDef AbilityDef
-        {
-            get
-            {
-                return Def as WizardAbilityDef;
-            }
-        }
-
         public PawnAbilityAttunement()
         {
         }
 
         public PawnAbilityAttunement(CompAbilityUser abilityUser) : base(abilityUser)
         {
-            this.abilityUser = (abilityUser as CompWizardry);
+            this.abilityUser = abilityUser as CompWizardry;
         }
 
-        public PawnAbilityAttunement(Pawn user, AbilityUser.AbilityDef pdef) : base(user, pdef)
+        public PawnAbilityAttunement(Pawn user, AbilityDef pdef) : base(user, pdef)
         {
         }
 
@@ -43,30 +23,29 @@ namespace Wizardry
         {
         }
 
-        public override void PostAbilityAttempt()
-        {
-            base.PostAbilityAttempt();
-        }
+        public CompWizardry Wizard => Pawn.GetComp<CompWizardry>();
+
+        public WizardAbilityDef AbilityDef => Def as WizardAbilityDef;
 
         public override string PostAbilityVerbCompDesc(VerbProperties_Ability verbDef)
         {
-            string text = "";
-            bool flag = verbDef == null;
+            var text = "";
             string result;
-            if (flag)
+            if (verbDef == null)
             {
                 result = text;
             }
             else
             {
-                bool flag2 = (_ = ((verbDef?.abilityDef) as WizardAbilityDef)) != null;
-                if (flag2)
+                if ((_ = verbDef.abilityDef as WizardAbilityDef) != null)
                 {
-                    StringBuilder stringBuilder = new StringBuilder();
+                    var stringBuilder = new StringBuilder();
                     text = stringBuilder.ToString();
                 }
+
                 result = text;
             }
+
             return result;
         }
 
@@ -80,28 +59,28 @@ namespace Wizardry
             base.Notify_AbilityFailed(refund);
             if (refund)
             {
-
             }
         }
 
         public override bool CanCastPowerCheck(AbilityContext context, out string reason)
         {
-            bool flag = base.CanCastPowerCheck(context, out reason);
+            var flag = base.CanCastPowerCheck(context, out reason);
             bool result;
             if (flag)
             {
                 reason = "";
-                bool flag2 = Def != null && (_ = (Def as WizardAbilityDef)) != null;
+                var flag2 = Def != null && (_ = Def as WizardAbilityDef) != null;
                 if (flag2)
                 {
-
                 }
+
                 result = true;
             }
             else
             {
                 result = false;
             }
+
             return result;
         }
     }

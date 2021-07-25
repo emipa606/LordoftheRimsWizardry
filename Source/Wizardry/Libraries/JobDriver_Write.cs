@@ -1,26 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using UnityEngine;
-//using VerseBase;
-using Verse;
+﻿using System.Collections.Generic;
 using Verse.AI;
+//using VerseBase;
 //using Verse.Sound;
-using RimWorld;
 //using RimWorld.Planet;
 //using RimWorld.SquadAI;
 
 
 namespace Wizardry
 {
-
     public class JobDriver_Write : JobDriver
     {
-
-        public JobDriver_Write() { }
-
         //What should we do?
         public override bool TryMakePreToilReservations(bool errorOnFailed)
         {
@@ -29,7 +18,6 @@ namespace Wizardry
 
         protected override IEnumerable<Toil> MakeNewToils()
         {
-
             // Toil 1:
             // Goto Target (TargetPack A is selected (It has the info where the target cell is))
             yield return Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell);
@@ -37,14 +25,16 @@ namespace Wizardry
 
             // Toil 2:
             // Write at the table.
-            Toil arrivalDraft = new Toil();
-            arrivalDraft.initAction = () =>
+            var arrivalDraft = new Toil
             {
-                // Here you can insert your own code about what should be done
-                // At the time when this toil is executed, the pawn is at the goto-cell from the first toil
-                pawn.drafter.Drafted = true;
+                initAction = () =>
+                {
+                    // Here you can insert your own code about what should be done
+                    // At the time when this toil is executed, the pawn is at the goto-cell from the first toil
+                    pawn.drafter.Drafted = true;
+                },
+                defaultCompleteMode = ToilCompleteMode.Instant
             };
-            arrivalDraft.defaultCompleteMode = ToilCompleteMode.Instant;
             yield return arrivalDraft;
 
 
@@ -54,8 +44,6 @@ namespace Wizardry
         }
     }
 }
-
-
 
 
 /*

@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
+using AbilityUser;
 
 namespace Wizardry
 {
-    public class SpellDefAttunement : AbilityUser.AbilityDef
+    public class SpellDefAttunement : AbilityDef
     {
         public List<string> tags = new List<string>();
     }

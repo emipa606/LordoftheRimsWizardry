@@ -1,57 +1,66 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using AbilityUser;
+using RimWorld;
 using UnityEngine;
 using Verse;
-using Verse.Noise;
 using Verse.Sound;
-using RimWorld;
 
 namespace Wizardry
 {
     [StaticConstructorOnStartup]
-    class Manwe_Projectile_Vortex : Projectile_AbilityBase
+    internal class Manwe_Projectile_Vortex : Projectile_AbilityBase
     {
-        Pawn pawn;
-        private int age = 0;
-        private int duration = 1200;
-        private readonly int strikeNum = 4;
-        private int strikeDelay = 20; //random 45-90 within class
-        private readonly int fireDelay = 10;
-        private Vector3 direction = default;
-        private bool initialized = false;
-        private readonly int leftFadeOutTicks = -1;
-        private Vector3 realPosition;
-        private Sustainer sustainer;
-        private float fireVortexValue = 0;
-
         private static readonly MaterialPropertyBlock matPropertyBlock = new MaterialPropertyBlock();
-        private static readonly Material TornadoMaterial = MaterialPool.MatFrom("Things/Ethereal/Tornado", ShaderDatabase.Transparent, MapMaterialRenderQueues.Tornado);
 
-        float radius = 5;
-        List<IntVec3> cellList;
-        
-        IEnumerable<IntVec3> targets;
+        private static readonly Material TornadoMaterial = MaterialPool.MatFrom("Things/Ethereal/Tornado",
+            ShaderDatabase.Transparent, MapMaterialRenderQueues.Tornado);
+
+        private readonly int fireDelay = 10;
+        private readonly int leftFadeOutTicks = -1;
+        private readonly int strikeNum = 4;
+        private int age;
+        private List<IntVec3> cellList;
+        private Vector3 direction;
+        private int duration = 1200;
+        private float fireVortexValue;
+        private bool initialized;
+        private Pawn pawn;
+
+        private float radius = 5;
+        private Vector3 realPosition;
+        private int strikeDelay = 20; //random 45-90 within class
+        private Sustainer sustainer;
+
+        private IEnumerable<IntVec3> targets;
+
+        private float FadeInOutFactor
+        {
+            get
+            {
+                var a = Mathf.Clamp01(age / 120f);
+                var b = leftFadeOutTicks >= 0 ? Mathf.Min(leftFadeOutTicks / 120f, 1f) : 1f;
+                return Mathf.Min(a, b);
+            }
+        }
 
         public override void ExposeData()
         {
             base.ExposeData();
-            Scribe_Values.Look<bool>(ref initialized, "initialized", true, false);
-            Scribe_Values.Look<int>(ref age, "age", -1, false);
-            Scribe_Values.Look<int>(ref duration, "duration", 900, false);
-            Scribe_Values.Look<int>(ref strikeDelay, "strikeDelay", 0, false);
-            Scribe_Values.Look<float>(ref fireVortexValue, "fireVortexValue", 0, false);
-            Scribe_References.Look<Pawn>(ref pawn, "pawn", false);
-            Scribe_Collections.Look<IntVec3>(ref cellList, "cellList", LookMode.Value);
-            Scribe_Values.Look<Vector3>(ref direction, "direction", default, false);
-            Scribe_Values.Look<Vector3>(ref realPosition, "realPosition", default, false);
+            Scribe_Values.Look(ref initialized, "initialized", true);
+            Scribe_Values.Look(ref age, "age", -1);
+            Scribe_Values.Look(ref duration, "duration", 900);
+            Scribe_Values.Look(ref strikeDelay, "strikeDelay");
+            Scribe_Values.Look(ref fireVortexValue, "fireVortexValue");
+            Scribe_References.Look(ref pawn, "pawn");
+            Scribe_Collections.Look(ref cellList, "cellList", LookMode.Value);
+            Scribe_Values.Look(ref direction, "direction");
+            Scribe_Values.Look(ref realPosition, "realPosition");
         }
 
         public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
         {
-            bool flag = age < duration;
-            if (!flag)
+            if (!(age < duration))
             {
                 base.Destroy(mode);
             }
@@ -67,18 +76,21 @@ namespace Wizardry
         {
             base.Impact(hitThing);
 
-            ThingDef def = this.def;
-            Pawn victim = null;
+            var unused = def;
 
             if (!initialized)
             {
                 pawn = launcher as Pawn;
-                radius = this.def.projectile.explosionRadius;
+                radius = def.projectile.explosionRadius;
                 initialized = true;
-                direction = GetVector(pawn.Position, Position);
+                if (pawn != null)
+                {
+                    direction = GetVector(pawn.Position, Position);
+                }
+
                 realPosition = Position.ToVector3();
                 targets = GenRadial.RadialCellsAround(Position, strikeNum, false);
-                cellList = targets.ToList<IntVec3>();
+                cellList = targets.ToList();
                 CreateSustainer();
             }
 
@@ -87,107 +99,138 @@ namespace Wizardry
                 Log.Error("Vortex sustainer is null.");
                 CreateSustainer();
             }
+
             sustainer.Maintain();
             UpdateSustainerVolume();
 
             realPosition += direction * .1f;
-            if (Map != null)
+            if (Map == null)
             {
-                if (!realPosition.ToIntVec3().Walkable(Map))
+                return;
+            }
+
+            if (!realPosition.ToIntVec3().Walkable(Map))
+            {
+                age = duration;
+            }
+
+            FleckMaker.ThrowTornadoDustPuff(realPosition, Map, Rand.Range(.6f, .9f), Color.white);
+            //EffectMaker.MakeEffect(FleckDefOf.TornadoDustPuff, realPosition, Map, Rand.Range(.6f, .9f), Rand.Range(0, 360), Rand.Range(4f, 5f), Rand.Range(100, 200));
+            IntVec3 curCell;
+            Vector3 moteVector;
+            for (var i = 0; i < 5; i++)
+            {
+                curCell = cellList.RandomElement();
+                if (!curCell.IsValid || !curCell.InBounds(Map))
                 {
-                    age = duration;
+                    continue;
                 }
-                EffectMaker.MakeEffect(ThingDefOf.Mote_TornadoDustPuff, realPosition, Map, Rand.Range(.6f, .9f), Rand.Range(0, 360), Rand.Range(4f, 5f), Rand.Range(100, 200));
-                IntVec3 curCell;
-                for (int i = 0; i < 5; i++)
+
+                moteVector = GetVector(realPosition.ToIntVec3(), curCell);
+                EffectMaker.MakeEffect(ThingDef.Named("Mote_Tornado"), curCell.ToVector3(), Map,
+                    Rand.Range(.4f, .8f),
+                    (Quaternion.AngleAxis(Rand.Range(-35, -55), Vector3.up) * moteVector).ToAngleFlat(),
+                    Rand.Range(1f, 3f), Rand.Range(-200, -500),
+                    (Quaternion.AngleAxis(Rand.Range(-35, -55), Vector3.up) * moteVector).ToAngleFlat(),
+                    Rand.Range(.2f, .3f), .1f, Rand.Range(.05f, .2f), true);
+            }
+
+            if (Find.TickManager.TicksGame % 50 == 0)
+            {
+                direction.x = Rand.Range(-.6f, .6f);
+                direction.z = Rand.Range(-.6f, .6f);
+            }
+
+            if (Find.TickManager.TicksGame % strikeDelay == 0)
+            {
+                foreach (var intVec3 in cellList)
                 {
-                    curCell = cellList.RandomElement();
-                    if (curCell.IsValid && curCell.InBounds(Map))
+                    curCell = intVec3;
+                    if (!curCell.IsValid || !curCell.InBounds(Map))
                     {
-                        Vector3 moteVector = GetVector(realPosition.ToIntVec3(), curCell);
-                        EffectMaker.MakeEffect(ThingDef.Named("Mote_Tornado"), curCell.ToVector3(), Map, Rand.Range(.4f, .8f), (Quaternion.AngleAxis(Rand.Range(-35, -55), Vector3.up) * moteVector).ToAngleFlat(), Rand.Range(1f, 3f), Rand.Range(-200, -500), (Quaternion.AngleAxis(Rand.Range(-35, -55), Vector3.up) * moteVector).ToAngleFlat(), Rand.Range(.2f, .3f), .1f, Rand.Range(.05f, .2f), true);
+                        continue;
                     }
-                }
 
-                if (Find.TickManager.TicksGame % 50 == 0)
-                {
-                    direction.x = (Rand.Range(-.6f, .6f));
-                    direction.z = (Rand.Range(-.6f, .6f));
-                }
-
-                if (Find.TickManager.TicksGame % strikeDelay == 0)
-                {
-                    for (int i = 0; i < cellList.Count(); i++)
+                    fireVortexValue += CalculateFireAmountInArea(curCell, .4f);
+                    var force = (10f / (curCell.ToVector3() - realPosition).magnitude) + 10f;
+                    var hitList = curCell.GetThingList(Map);
+                    foreach (var dmgThing in hitList)
                     {
-                        curCell = cellList[i];
-                        if (curCell.IsValid && curCell.InBounds(Map))
+                        var launchVector = GetVector(dmgThing.Position, realPosition.ToIntVec3());
+                        var projectedPosition = dmgThing.Position + (force * launchVector).ToIntVec3();
+                        if (dmgThing is Pawn victim)
                         {
-                            fireVortexValue += CalculateFireAmountInArea(curCell, .4f);
-                            float force = (10f / (curCell.ToVector3() - realPosition).magnitude + 10f);
-                            Thing dmgThing;
-                            List<Thing> hitList = curCell.GetThingList(Map);
-                            for (int j = 0; j < hitList.Count; j++)
+                            if (!projectedPosition.IsValid || !projectedPosition.InBounds(Map) || victim.Dead)
                             {
-                                dmgThing = hitList[j];                                
-                                Vector3 launchVector = GetVector(dmgThing.Position, realPosition.ToIntVec3());
-                                IntVec3 projectedPosition = dmgThing.Position + (force * launchVector).ToIntVec3();
-                                if (dmgThing is Pawn)
-                                {
-                                    victim = dmgThing as Pawn;
-                                    int mass = 10; // victim.mass possible calculation, currently not used
-                                    if (projectedPosition.IsValid && projectedPosition.InBounds(Map) && !victim.Dead)
-                                    {
-                                        if (fireVortexValue > 0)
-                                        {
-                                            DamageEntities(dmgThing, Mathf.RoundToInt(this.def.projectile.GetDamageAmount(1, null) * force), DamageDefOf.Flame);
-                                            fireVortexValue -= .2f;
-                                        }
-                                        LaunchFlyingObect(projectedPosition, victim);
-                                    }
-                                }
-                                else if(dmgThing is Building)
-                                {
-                                    if (fireVortexValue > 0)
-                                    {
-                                        DamageEntities(dmgThing, Mathf.RoundToInt(this.def.projectile.GetDamageAmount(1, null) * force * 2), DamageDefOf.Flame);
-                                        fireVortexValue -= .2f;
-                                    }
-                                }
-                                else if (dmgThing.def.EverHaulable && !(dmgThing is Corpse))
-                                {
-                                    if (projectedPosition.IsValid && projectedPosition.InBounds(Map))
-                                    {
-                                        LaunchFlyingObect(projectedPosition, dmgThing);
-                                    }
-                                }
+                                continue;
+                            }
+
+                            if (fireVortexValue > 0)
+                            {
+                                DamageEntities(victim,
+                                    Mathf.RoundToInt(def.projectile.GetDamageAmount(1) * force),
+                                    DamageDefOf.Flame);
+                                fireVortexValue -= .2f;
+                            }
+
+                            LaunchFlyingObect(projectedPosition, victim);
+                        }
+                        else if (dmgThing is Building)
+                        {
+                            if (!(fireVortexValue > 0))
+                            {
+                                continue;
+                            }
+
+                            DamageEntities(dmgThing,
+                                Mathf.RoundToInt(def.projectile.GetDamageAmount(1) * force * 2),
+                                DamageDefOf.Flame);
+                            fireVortexValue -= .2f;
+                        }
+                        else if (dmgThing.def.EverHaulable && !(dmgThing is Corpse))
+                        {
+                            if (projectedPosition.IsValid && projectedPosition.InBounds(Map))
+                            {
+                                LaunchFlyingObect(projectedPosition, dmgThing);
                             }
                         }
                     }
-                    targets = GenRadial.RadialCellsAround(realPosition.ToIntVec3(), strikeNum, true);
-                    cellList = targets.ToList<IntVec3>();
+                }
 
-                }
-                if (fireVortexValue > 0)
-                {
-                    if (Find.TickManager.TicksGame % fireDelay == 0)
-                    {
-                        curCell = cellList.RandomElement();
-                        Vector3 moteVector = GetVector(realPosition.ToIntVec3(), curCell);
-                        EffectMaker.MakeEffect(ThingDef.Named("Mote_MicroSparks"), cellList.RandomElement().ToVector3Shifted(), Map, Rand.Range(.5f, 1f), (Quaternion.AngleAxis(Rand.Range(-35, -50), Vector3.up) * moteVector).ToAngleFlat(), Rand.Range(2, 3), Rand.Range(50, 200));
-                        EffectMaker.MakeEffect(ThingDef.Named("Mote_MicroSparks"), cellList.RandomElement().ToVector3Shifted(), Map, Rand.Range(.5f, 1f), (Quaternion.AngleAxis(Rand.Range(35, 50), Vector3.up) * moteVector).ToAngleFlat(), Rand.Range(1, 2), Rand.Range(50, 200));
-                        DoFireVortex();
-                    }
-                }
+                targets = GenRadial.RadialCellsAround(realPosition.ToIntVec3(), strikeNum, true);
+                cellList = targets.ToList();
             }
+
+            if (!(fireVortexValue > 0))
+            {
+                return;
+            }
+
+            if (Find.TickManager.TicksGame % fireDelay != 0)
+            {
+                return;
+            }
+
+            curCell = cellList.RandomElement();
+            moteVector = GetVector(realPosition.ToIntVec3(), curCell);
+            EffectMaker.MakeEffect(ThingDef.Named("Mote_MicroSparks"),
+                cellList.RandomElement().ToVector3Shifted(), Map, Rand.Range(.5f, 1f),
+                (Quaternion.AngleAxis(Rand.Range(-35, -50), Vector3.up) * moteVector).ToAngleFlat(),
+                Rand.Range(2, 3), Rand.Range(50, 200));
+            EffectMaker.MakeEffect(ThingDef.Named("Mote_MicroSparks"),
+                cellList.RandomElement().ToVector3Shifted(), Map, Rand.Range(.5f, 1f),
+                (Quaternion.AngleAxis(Rand.Range(35, 50), Vector3.up) * moteVector).ToAngleFlat(),
+                Rand.Range(1, 2), Rand.Range(50, 200));
+            DoFireVortex();
         }
 
         private void DoFireVortex()
         {
-            IEnumerable<IntVec3> targetsCellsSmall = GenRadial.RadialCellsAround(realPosition.ToIntVec3(), 3, true);
-            IEnumerable<IntVec3> targetsCells = GenRadial.RadialCellsAround(realPosition.ToIntVec3(), 4, true).Except(targetsCellsSmall);
-            IntVec3 startCell = targetsCells.RandomElement();
-            Vector3 moteVector = GetVector(realPosition.ToIntVec3(), startCell);
-            Thing launchedThing = new Thing()
+            var targetsCellsSmall = GenRadial.RadialCellsAround(realPosition.ToIntVec3(), 3, true);
+            var targetsCells = GenRadial.RadialCellsAround(realPosition.ToIntVec3(), 4, true).Except(targetsCellsSmall);
+            var startCell = targetsCells.RandomElement();
+            var moteVector = GetVector(realPosition.ToIntVec3(), startCell);
+            var launchedThing = new Thing
             {
                 def = WizardryDefOf.FlyingObject_StreamingFlame
             };
@@ -197,96 +240,104 @@ namespace Wizardry
 
         public void LaunchFlames(IntVec3 startCell, IntVec3 targetCell, Thing thing)
         {
-            bool flag = targetCell != null && targetCell != default;
-            if (flag)
+            if (targetCell == default)
             {
-                if (thing != null)
-                {
-                    Varda_FlyingObject_StreamingFlame flyingObject = (Varda_FlyingObject_StreamingFlame)GenSpawn.Spawn(ThingDef.Named("FlyingObject_StreamingFlame"), startCell, Map);
-                    flyingObject.speed = 22;
-                    flyingObject.Launch(pawn, targetCell, thing);
-                }
+                return;
             }
+
+            if (thing == null)
+            {
+                return;
+            }
+
+            var flyingObject =
+                (Varda_FlyingObject_StreamingFlame) GenSpawn.Spawn(
+                    ThingDef.Named("FlyingObject_StreamingFlame"), startCell, Map);
+            flyingObject.speed = 22;
+            flyingObject.Launch(pawn, targetCell, thing);
         }
 
         public float CalculateFireAmountInArea(IntVec3 center, float radius)
         {
             float result = 0;
-            IntVec3 curCell;
-            List<Thing> fireList = Map.listerThings.ThingsOfDef(ThingDefOf.Fire);
-            IEnumerable<IntVec3> targetCells = GenRadial.RadialCellsAround(center, radius, true);
-            for (int i = 0; i < targetCells.Count(); i++)
+            var fireList = Map.listerThings.ThingsOfDef(ThingDefOf.Fire);
+            var targetCells = GenRadial.RadialCellsAround(center, radius, true);
+            for (var i = 0; i < targetCells.Count(); i++)
             {
-                curCell = targetCells.ToArray<IntVec3>()[i];
-                if (curCell.InBounds(Map) && curCell.IsValid)
+                var curCell = targetCells.ToArray()[i];
+                if (!curCell.InBounds(Map) || !curCell.IsValid)
                 {
-                    for (int j = 0; j < fireList.Count; j++)
+                    continue;
+                }
+
+                foreach (var thing in fireList)
+                {
+                    if (thing.Position != curCell)
                     {
-                        if (fireList[j].Position == curCell)
-                        {
-                            Fire fire = fireList[j] as Fire;
-                            result += fire.fireSize;                            
-                            MoteMaker.ThrowSmoke(curCell.ToVector3Shifted(), Map, fire.fireSize * 1.5f);
-                            fire.Destroy();
-                        }
+                        continue;
                     }
+
+                    var fire = thing as Fire;
+                    if (fire == null)
+                    {
+                        continue;
+                    }
+
+                    result += fire.fireSize;
+                    FleckMaker.ThrowSmoke(curCell.ToVector3Shifted(), Map, fire.fireSize * 1.5f);
+                    fire.Destroy();
                 }
             }
+
             return result;
         }
 
         public void RemoveFireAtPosition(IntVec3 pos)
         {
-            GenExplosion.DoExplosion(pos, Map, 1, DamageDefOf.Extinguish, launcher, 100, 0, SoundDef.Named("ExpandingFlames"), def, equipmentDef, null, null, 0f, 1, false, null, 0f, 1, 0f, false);
+            GenExplosion.DoExplosion(pos, Map, 1, DamageDefOf.Extinguish, launcher, 100, 0,
+                SoundDef.Named("ExpandingFlames"), def, equipmentDef);
         }
 
         private float AdjustedDistanceFromCenter(float distanceFromCenter)
         {
-            float num = Mathf.Min(distanceFromCenter / 8f, 1f);
+            var num = Mathf.Min(distanceFromCenter / 8f, 1f);
             num *= num;
             return distanceFromCenter * num;
         }
 
         public void LaunchFlyingObect(IntVec3 targetCell, Thing thing)
         {
-            bool flag = targetCell != null && targetCell != default;
-            if (flag)
+            if (targetCell == default)
             {
-                if (thing != null && thing.Position.IsValid && !Destroyed && thing.Spawned && thing.Map != null)
-                {
-                    FlyingObject_Spinning flyingObject = (FlyingObject_Spinning)GenSpawn.Spawn(ThingDef.Named("FlyingObject_Spinning"), thing.Position, thing.Map);
-                    flyingObject.speed = 22;
-                    flyingObject.Launch(pawn, targetCell, thing);
-                }
+                return;
             }
+
+            if (thing == null || !thing.Position.IsValid || Destroyed || !thing.Spawned || thing.Map == null)
+            {
+                return;
+            }
+
+            var flyingObject = (FlyingObject_Spinning) GenSpawn.Spawn(ThingDef.Named("FlyingObject_Spinning"),
+                thing.Position, thing.Map);
+            flyingObject.speed = 22;
+            flyingObject.Launch(pawn, targetCell, thing);
         }
 
         public Vector3 GetVector(IntVec3 center, IntVec3 objectPos)
         {
-            Vector3 heading = (objectPos - center).ToVector3();
-            float distance = heading.magnitude;
-            Vector3 direction = heading / distance;
-            return direction;
+            var heading = (objectPos - center).ToVector3();
+            var distance = heading.magnitude;
+            var getVector = heading / distance;
+            return getVector;
         }
 
         public void DamageEntities(Thing e, float d, DamageDef type)
         {
-            int amt = Mathf.RoundToInt(Rand.Range(.75f, 1.25f) * d);
-            DamageInfo dinfo = new DamageInfo(type, amt, 0, (float)-1, pawn, null, null, DamageInfo.SourceCategory.ThingOrUnknown);
-            bool flag = e != null;
-            if (flag)
+            var amt = Mathf.RoundToInt(Rand.Range(.75f, 1.25f) * d);
+            var dinfo = new DamageInfo(type, amt, 0, -1, pawn);
+            if (e != null)
             {
                 e.TakeDamage(dinfo);
-            }
-        }
-
-        private float FadeInOutFactor
-        {
-            get
-            {
-                float a = Mathf.Clamp01((float)(age) / 120f);
-                float b = (leftFadeOutTicks >= 0) ? Mathf.Min((float)leftFadeOutTicks / 120f, 1f) : 1f;
-                return Mathf.Min(a, b);
             }
         }
 
@@ -299,7 +350,7 @@ namespace Wizardry
         {
             LongEventHandler.ExecuteWhenFinished(delegate
             {
-                SoundDef soundDef = SoundDef.Named("Tornado");
+                var soundDef = SoundDef.Named("Tornado");
                 sustainer = soundDef.TrySpawnSustainer(SoundInfo.InMap(this, MaintenanceType.PerTick));
                 UpdateSustainerVolume();
             });

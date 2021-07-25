@@ -1,46 +1,42 @@
-﻿using System;
+﻿using System.Linq;
 using AbilityUser;
-using Verse;
 using RimWorld;
-using Verse.AI;
-using System.Collections.Generic;
-using UnityEngine;
-using System.Linq;
+using Verse;
 
 namespace Wizardry
 {
     public class Ulmo_Verb_FlameSong : Verb_UseAbility
     {
-
-        float fireAmount = 0;
+        private float fireAmount;
 
         protected override bool TryCastShot()
         {
-            Map map = base.CasterPawn.Map;
-            Pawn pawn = base.CasterPawn;
-            IntVec3 centerCell = currentTarget.Cell;
+            var map = base.CasterPawn.Map;
+            var unused = base.CasterPawn;
+            var centerCell = currentTarget.Cell;
             fireAmount = CalculateFireAmountInArea(centerCell, Projectile.projectile.explosionRadius, map);
-            if ((centerCell.IsValid && centerCell.InBounds(map)))
+            if (centerCell.IsValid && centerCell.InBounds(map))
             {
                 Thing thing = null;
                 if (fireAmount > 8f)
                 {
-                    thing = ThingMaker.MakeThing(ThingDef.Named("LotRW_Flamesong_Orb"), null);
+                    thing = ThingMaker.MakeThing(ThingDef.Named("LotRW_Flamesong_Orb"));
                 }
                 else if (fireAmount > 1f)
                 {
-                    thing = ThingMaker.MakeThing(ThingDef.Named("LotRW_Flamesong_Orb_Small"), null);
-                }                
-                
+                    thing = ThingMaker.MakeThing(ThingDef.Named("LotRW_Flamesong_Orb_Small"));
+                }
+
                 if (thing != null)
                 {
-                    GenPlace.TryPlaceThing(thing, centerCell, map, ThingPlaceMode.Near, null);
+                    GenPlace.TryPlaceThing(thing, centerCell, map, ThingPlaceMode.Near);
                 }
             }
             else
             {
                 Messages.Message("failed to spawn orb of flamesong", MessageTypeDefOf.RejectInput);
             }
+
             Ability.PostAbilityAttempt();
             burstShotsLeft = 0;
             return false;
@@ -49,31 +45,39 @@ namespace Wizardry
         public float CalculateFireAmountInArea(IntVec3 center, float radius, Map map)
         {
             float result = 0;
-            IntVec3 curCell;
-            List<Thing> fireList = map.listerThings.ThingsOfDef(ThingDefOf.Fire);
-            IEnumerable<IntVec3> targetCells = GenRadial.RadialCellsAround(center, radius, true);
-            for (int i = 0; i < targetCells.Count(); i++)
+            var fireList = map.listerThings.ThingsOfDef(ThingDefOf.Fire);
+            var targetCells = GenRadial.RadialCellsAround(center, radius, true);
+            for (var i = 0; i < targetCells.Count(); i++)
             {
-                curCell = targetCells.ToArray<IntVec3>()[i];
-                if (curCell.InBounds(map) && curCell.IsValid)
+                var curCell = targetCells.ToArray()[i];
+                if (!curCell.InBounds(map) || !curCell.IsValid)
                 {
-                    for (int j = 0; j < fireList.Count; j++)
+                    continue;
+                }
+
+                foreach (var thing in fireList)
+                {
+                    if (thing.Position != curCell)
                     {
-                        if (fireList[j].Position == curCell)
-                        {
-                            Fire fire = fireList[j] as Fire;
-                            result += fire.fireSize;
-                            RemoveFireAtPosition(curCell, map);
-                        }
+                        continue;
                     }
+
+                    if (thing is Fire fire)
+                    {
+                        result += fire.fireSize;
+                    }
+
+                    RemoveFireAtPosition(curCell, map);
                 }
             }
+
             return result;
         }
 
         public void RemoveFireAtPosition(IntVec3 pos, Map map)
         {
-            GenExplosion.DoExplosion(pos, map, 1, DamageDefOf.Extinguish, CasterPawn, 100, 0, SoundDef.Named("ExpandingFlames"), null, null, null, null, 0f, 1, false, null, 0f, 1, 0f, false);
+            GenExplosion.DoExplosion(pos, map, 1, DamageDefOf.Extinguish, CasterPawn, 100, 0,
+                SoundDef.Named("ExpandingFlames"));
         }
     }
 }

@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using UnityEngine;
-using Verse;
-using Verse.AI;
-using Verse.AI.Group;
-using Verse.Sound;
-using RimWorld;
+﻿using Verse;
 
 namespace Wizardry
 {
@@ -15,50 +7,58 @@ namespace Wizardry
         public override void Tick()
         {
             base.Tick();
-            if (Map != null)
-            {                
-                if (Find.TickManager.TicksGame % 2 == 0)
-                {
-                    DestroyProjectiles();
-                    if (Find.TickManager.TicksGame % 6 == 0)
-                    {
-                        SlowNearbyPawns();
-                    }
-                }
+            if (Map == null)
+            {
+                return;
+            }
+
+            if (Find.TickManager.TicksGame % 2 != 0)
+            {
+                return;
+            }
+
+            DestroyProjectiles();
+            if (Find.TickManager.TicksGame % 6 == 0)
+            {
+                SlowNearbyPawns();
             }
         }
 
         public void DestroyProjectiles()
         {
-            List<Thing> cellList = Position.GetThingList(Map);
-            for (int i = 0; i < cellList.Count; i++)
+            var cellList = Position.GetThingList(Map);
+            foreach (var thing in cellList)
             {
-                if (cellList[i] is Projectile && cellList[i].def.defName != "LotRW_Projectile_AirWall")
+                if (thing is not Projectile || thing.def.defName == "LotRW_Projectile_AirWall")
                 {
-                    Vector3 displayEffect = DrawPos;
-                    displayEffect.x += Rand.Range(-.3f, .3f);
-                    displayEffect.y += Rand.Range(-.3f, .3f);
-                    displayEffect.z += Rand.Range(-.3f, .3f);
-                    EffectMaker.MakeEffect(ThingDef.Named("Mote_LightningGlow"), displayEffect, Map, cellList[i].def.projectile.GetDamageAmount(1, null)/8f);
-                    cellList[i].Destroy(DestroyMode.Vanish);
+                    continue;
                 }
+
+                var displayEffect = DrawPos;
+                displayEffect.x += Rand.Range(-.3f, .3f);
+                displayEffect.y += Rand.Range(-.3f, .3f);
+                displayEffect.z += Rand.Range(-.3f, .3f);
+                EffectMaker.MakeEffect(ThingDef.Named("Mote_LightningGlow"), displayEffect, Map,
+                    thing.def.projectile.GetDamageAmount(1) / 8f);
+                thing.Destroy();
             }
         }
 
         public void SlowNearbyPawns()
         {
-            int num = GenRadial.NumCellsInRadius(1);
-            Pawn p = null;
-            for (int i = 0; i < num; i++)
+            var num = GenRadial.NumCellsInRadius(1);
+            for (var i = 0; i < num; i++)
             {
-                IntVec3 intVec = Position + GenRadial.RadialPattern[i];
-                if (intVec.IsValid && intVec.InBounds(Map))
+                var intVec = Position + GenRadial.RadialPattern[i];
+                if (!intVec.IsValid || !intVec.InBounds(Map))
                 {
-                    p = intVec.GetFirstPawn(Map);
-                    if(p != null)
-                    {
-                        HealthUtility.AdjustSeverity(p, HediffDef.Named("LotRW_SlowHD"), .5f);
-                    }
+                    continue;
+                }
+
+                var p = intVec.GetFirstPawn(Map);
+                if (p != null)
+                {
+                    HealthUtility.AdjustSeverity(p, HediffDef.Named("LotRW_SlowHD"), .5f);
                 }
             }
         }

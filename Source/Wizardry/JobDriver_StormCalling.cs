@@ -1,23 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Verse;
+﻿using System.Collections.Generic;
 using RimWorld;
+using Verse;
 using Verse.AI;
-using UnityEngine;
-
 
 namespace Wizardry
 {
     internal class JobDriver_StormCalling : JobDriver
     {
         private const TargetIndex building = TargetIndex.A;
+        private readonly int duration = 1200;
+        private readonly List<Pawn> targetList = new List<Pawn>();
 
-        int age = -1;
-        int lastStrike = 0;
-        int ticksTillNextStrike = 120;
-        readonly int duration = 1200;
-        readonly List<Pawn> targetList = new List<Pawn>();
+        private int age = -1;
+        private int lastStrike;
+        private int ticksTillNextStrike = 120;
 
         public override bool TryMakePreToilReservations(bool errorOnFailed)
         {
@@ -25,61 +21,73 @@ namespace Wizardry
         }
 
         protected override IEnumerable<Toil> MakeNewToils()
-        {           
-            Toil commandStorm = new Toil();
-            commandStorm.initAction = delegate
+        {
+            var commandStorm = new Toil
             {
-                if (age > duration)
+                initAction = delegate
                 {
-                    EndJobWith(JobCondition.Succeeded);
-                }
-                Map map = pawn.Map;
-                bool flag = map.weatherManager.curWeather.defName == "Rain" || map.weatherManager.curWeather.defName == "RainyThunderstorm" || map.weatherManager.curWeather.defName == "FoggyRain" || 
-                map.weatherManager.curWeather.defName == "SnowHard" || map.weatherManager.curWeather.defName == "SnowGentle" || map.weatherManager.curWeather.defName == "DryThunderstorm";
-                if (!flag)
+                    if (age > duration)
+                    {
+                        EndJobWith(JobCondition.Succeeded);
+                    }
+
+                    var map = pawn.Map;
+                    if (!(map.weatherManager.curWeather.defName == "Rain" ||
+                          map.weatherManager.curWeather.defName == "RainyThunderstorm" ||
+                          map.weatherManager.curWeather.defName == "FoggyRain" ||
+                          map.weatherManager.curWeather.defName == "SnowHard" ||
+                          map.weatherManager.curWeather.defName == "SnowGentle" ||
+                          map.weatherManager.curWeather.defName == "DryThunderstorm"))
+                    {
+                        EndJobWith(JobCondition.Succeeded);
+                    }
+
+                    GetTargetList();
+                    if (targetList.Count < 1)
+                    {
+                        EndJobWith(JobCondition.Succeeded);
+                    }
+                },
+                tickAction = delegate
                 {
-                    EndJobWith(JobCondition.Succeeded);
-                }
-                GetTargetList();
-                if (targetList.Count < 1)
-                {
-                    EndJobWith(JobCondition.Succeeded);
-                }
+                    if (age > lastStrike + ticksTillNextStrike)
+                    {
+                        DoWeatherEffect();
+                        ticksTillNextStrike = Rand.Range(20, 200);
+                        lastStrike = age;
+                    }
+
+                    if (Find.TickManager.TicksGame % 4 == 0)
+                    {
+                        float direction = Rand.Range(0, 360);
+                        EffectMaker.MakeEffect(WizardryDefOf.Mote_CastingBeam, pawn.DrawPos, pawn.Map,
+                            Rand.Range(.1f, .4f),
+                            direction, Rand.Range(8, 10), 0, direction, 0.2f, .02f, .1f, false);
+                    }
+
+                    age++;
+                    ticksLeftThisToil = duration - age;
+                    if (age > duration)
+                    {
+                        EndJobWith(JobCondition.Succeeded);
+                    }
+
+                    if (Map.weatherManager.curWeather.defName == "Clear")
+                    {
+                        EndJobWith(JobCondition.Succeeded);
+                    }
+                },
+                defaultCompleteMode = ToilCompleteMode.Delay,
+                defaultDuration = duration
             };
-            commandStorm.tickAction = delegate
-            {
-                if (age > (lastStrike + ticksTillNextStrike))
-                {
-                    DoWeatherEffect();
-                    ticksTillNextStrike = Rand.Range(20, 200);
-                    lastStrike = age;
-                }
-                if(Find.TickManager.TicksGame % 4 ==0)
-                {
-                    float direction = Rand.Range(0, 360);
-                    EffectMaker.MakeEffect(WizardryDefOf.Mote_CastingBeam, pawn.DrawPos, pawn.Map, Rand.Range(.1f, .4f), direction, Rand.Range(8, 10), 0, direction, 0.2f, .02f, .1f, false);
-                }
-                age++;
-                ticksLeftThisToil = duration - age;
-                if (age > duration)
-                {
-                    EndJobWith(JobCondition.Succeeded);
-                }
-                if (Map.weatherManager.curWeather.defName == "Clear")
-                {
-                    EndJobWith(JobCondition.Succeeded);
-                }
-            };
-            commandStorm.defaultCompleteMode = ToilCompleteMode.Delay;
-            commandStorm.defaultDuration = duration;
             commandStorm.WithProgressBar(TargetIndex.A, delegate
             {
                 if (pawn.DestroyedOrNull() || pawn.Dead || pawn.Downed)
                 {
                     return 1f;
                 }
-                return 1f - (float)commandStorm.actor.jobs.curDriver.ticksLeftThisToil / duration;
 
+                return 1f - ((float) commandStorm.actor.jobs.curDriver.ticksLeftThisToil / duration);
             }, false, 0f);
             commandStorm.AddFinishAction(delegate
             {
@@ -91,26 +99,26 @@ namespace Wizardry
 
         private void GetTargetList()
         {
-            List<Pawn> mapPawns = Map.mapPawns.AllPawnsSpawned;
-            for (int i =0; i < mapPawns.Count(); i++)
+            var mapPawns = Map.mapPawns.AllPawnsSpawned;
+            foreach (var item in mapPawns)
             {
-                if(!mapPawns[i].DestroyedOrNull() && !mapPawns[i].Dead && !mapPawns[i].Downed && mapPawns[i].HostileTo(pawn))
+                if (!item.DestroyedOrNull() && !item.Dead && !item.Downed &&
+                    item.HostileTo(pawn))
                 {
-                    targetList.Add(mapPawns[i]);                    
+                    targetList.Add(item);
                 }
             }
         }
 
         private void DoWeatherEffect()
         {
-            
-            Pawn pawn = targetList.RandomElement();
-            float rnd = Rand.Range(0f, 1f);
-            if(rnd > .8f)
+            var randomElement = targetList.RandomElement();
+            var rnd = Rand.Range(0f, 1f);
+            if (rnd > .8f)
             {
                 rnd = 3;
             }
-            else if(rnd > .5f)
+            else if (rnd > .5f)
             {
                 rnd = 2;
             }
@@ -118,9 +126,10 @@ namespace Wizardry
             {
                 rnd = 1;
             }
-            for (int i = 0; i < rnd; i++)
+
+            for (var i = 0; i < rnd; i++)
             {
-                IntVec3 strikeLoc = pawn.Position;
+                var strikeLoc = randomElement.Position;
                 strikeLoc.x += Rand.Range(-2, 2);
                 strikeLoc.z += Rand.Range(-2, 2);
                 Map.weatherManager.eventHandler.AddEvent(new WeatherEvent_LightningStrike(Map, strikeLoc));

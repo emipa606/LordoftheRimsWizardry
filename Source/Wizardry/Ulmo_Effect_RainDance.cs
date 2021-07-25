@@ -1,30 +1,22 @@
-﻿using System;
-using AbilityUser;
+﻿using AbilityUser;
 using Verse;
-using RimWorld;
-using Verse.AI;
-using System.Collections.Generic;
-using UnityEngine;
-using System.Linq;
 
 namespace Wizardry
 {
     public class Ulmo_Effect_RainDance : Verb_UseAbility
     {
-
         public virtual void Effect()
         {
-            LocalTargetInfo t = base.CasterPawn;
-            IntVec3 targetCell = base.CasterPawn.Position;
+            var targetCell = base.CasterPawn.Position;
             targetCell.z += 3;
-            t = targetCell;
-            bool flag = targetCell.InBounds(base.CasterPawn.Map) && targetCell.IsValid;
-            if (flag)
-            {          
+            LocalTargetInfo t = targetCell;
+            if (targetCell.InBounds(base.CasterPawn.Map) && targetCell.IsValid)
+            {
                 //base.CasterPawn.rotationTracker.Face(targetCell.ToVector3());
                 LongEventHandler.QueueLongEvent(delegate
                 {
-                    Ulmo_FlyingObject_RainDance flyingObject = (Ulmo_FlyingObject_RainDance)GenSpawn.Spawn(ThingDef.Named("FlyingObject_RainDance"), CasterPawn.Position, CasterPawn.Map);
+                    var flyingObject = (Ulmo_FlyingObject_RainDance) GenSpawn.Spawn(
+                        ThingDef.Named("FlyingObject_RainDance"), CasterPawn.Position, CasterPawn.Map);
                     flyingObject.Launch(CasterPawn, t.Cell, base.CasterPawn);
                 }, "LaunchingFlyer", false, null);
             }
@@ -41,7 +33,8 @@ namespace Wizardry
                 Effect();
                 outResult = true;
             }
+
             outResult = inResult;
-        }      
+        }
     }
 }

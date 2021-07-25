@@ -1,33 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
-using RimWorld;
+﻿using AbilityUser;
 using Verse;
-using AbilityUser;
 
 namespace Wizardry
 {
     public class Ulmo_Effect_WolfSong : Verb_UseAbility
     {
-        bool validTarg;
+        private bool validTarg;
 
         public override bool CanHitTargetFrom(IntVec3 root, LocalTargetInfo targ)
         {
-            if (targ.IsValid && targ.CenterVector3.InBounds(base.CasterPawn.Map) && !targ.Cell.Fogged(base.CasterPawn.Map) && targ.Cell.Walkable(base.CasterPawn.Map))
+            if (targ.IsValid && targ.CenterVector3.InBounds(base.CasterPawn.Map) &&
+                !targ.Cell.Fogged(base.CasterPawn.Map) && targ.Cell.Walkable(base.CasterPawn.Map))
             {
                 if ((root - targ.Cell).LengthHorizontal < verbProps.range)
                 {
                     if (CasterIsPawn && CasterPawn.apparel != null)
                     {
-                        List<Apparel> wornApparel = CasterPawn.apparel.WornApparel;
-                        for (int i = 0; i < wornApparel.Count; i++)
+                        var wornApparel = CasterPawn.apparel.WornApparel;
+                        foreach (var apparel in wornApparel)
                         {
-                            if (!wornApparel[i].AllowVerbCast(root, caster.Map, targ, this))
+                            if (!apparel.AllowVerbCast(this))
                             {
                                 return false;
                             }
                         }
+
                         validTarg = true;
                     }
                     else
@@ -45,26 +42,30 @@ namespace Wizardry
             {
                 validTarg = false;
             }
+
             return validTarg;
         }
 
         public virtual void Effect()
         {
-            LocalTargetInfo t = currentTarget;
-            bool flag = t.Cell != default;
-            if (flag)
+            var t = currentTarget;
+            if (t.Cell == default)
             {
-                Thing launchedThing = new Thing()
-                {
-                    def = WizardryDefOf.FlyingObject_WolfSong
-                };
-                //Pawn casterPawn = base.CasterPawn;
-                LongEventHandler.QueueLongEvent(delegate
-                {
-                    Ulmo_FlyingObject_WolfSong flyingObject = (Ulmo_FlyingObject_WolfSong)GenSpawn.Spawn(ThingDef.Named("FlyingObject_WolfSong"), CasterPawn.Position, CasterPawn.Map);
-                    flyingObject.Launch(CasterPawn, t.Cell, launchedThing);
-                }, "LaunchingFlyer", false, null);
+                return;
             }
+
+            var launchedThing = new Thing
+            {
+                def = WizardryDefOf.FlyingObject_WolfSong
+            };
+            //Pawn casterPawn = base.CasterPawn;
+            LongEventHandler.QueueLongEvent(delegate
+            {
+                var flyingObject =
+                    (Ulmo_FlyingObject_WolfSong) GenSpawn.Spawn(ThingDef.Named("FlyingObject_WolfSong"),
+                        CasterPawn.Position, CasterPawn.Map);
+                flyingObject.Launch(CasterPawn, t.Cell, launchedThing);
+            }, "LaunchingFlyer", false, null);
         }
 
         public override void PostCastShot(bool inResult, out bool outResult)
@@ -74,6 +75,7 @@ namespace Wizardry
                 Effect();
                 outResult = true;
             }
+
             outResult = inResult;
         }
     }

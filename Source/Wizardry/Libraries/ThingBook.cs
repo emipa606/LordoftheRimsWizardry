@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using RimWorld;
+﻿using RimWorld;
 using Verse;
 
 namespace Wizardry
 {
     public class ThingBook : ThingWithComps
     {
-        CompArt compArt = null;
-        CompArt CompArt
+        private CompArt compArt;
+
+        private CompArt CompArt
         {
             get
             {
@@ -18,6 +15,7 @@ namespace Wizardry
                 {
                     compArt = this.TryGetComp<CompArt>();
                 }
+
                 return compArt;
             }
         }
@@ -28,8 +26,10 @@ namespace Wizardry
             {
                 if (CompArt != null)
                 {
-                    return "Estate_BookTitle".Translate(new object[] { CompArt.Title, CompArt.AuthorName }) + " (" + base.Label + ")";
+                    return "Estate_BookTitle".Translate(CompArt.Title, CompArt.AuthorName) + " (" +
+                           base.Label + ")";
                 }
+
                 return base.Label;
             }
         }
