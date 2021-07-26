@@ -1,5 +1,8 @@
 # Changelog for LordoftheRimsWizardry
 
+1.0.7.0 - Fixed the vortex and the wolf song
+
+
 1.0.6.0 - Updated for 1.3, replaced the bodypart-based Istari beard with the vanilla Seer instead
 
 

@@ -154,8 +154,9 @@ namespace Wizardry
                     fireVortexValue += CalculateFireAmountInArea(curCell, .4f);
                     var force = (10f / (curCell.ToVector3() - realPosition).magnitude) + 10f;
                     var hitList = curCell.GetThingList(Map);
-                    foreach (var dmgThing in hitList)
+                    for (var index = 0; index < hitList.Count; index++)
                     {
+                        var dmgThing = hitList[index];
                         var launchVector = GetVector(dmgThing.Position, realPosition.ToIntVec3());
                         var projectedPosition = dmgThing.Position + (force * launchVector).ToIntVec3();
                         if (dmgThing is Pawn victim)
@@ -270,8 +271,9 @@ namespace Wizardry
                     continue;
                 }
 
-                foreach (var thing in fireList)
+                for (var index = 0; index < fireList.Count; index++)
                 {
+                    var thing = fireList[index];
                     if (thing.Position != curCell)
                     {
                         continue;

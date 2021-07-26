@@ -231,17 +231,18 @@ namespace Wizardry
                 return;
             }
 
-            var moteSmoke = ThingDef.Named("Mote_Smoke");
-            if (Rand.Chance(.5f))
-            {
-                EffectMaker.MakeEffect(moteSmoke, curCell.ToVector3(), Map, Rand.Range(.8f, 1.3f),
-                    direction.ToAngleFlat(), Rand.Range(.4f, .6f), Rand.Range(-2, 2));
-            }
-            else
-            {
-                EffectMaker.MakeEffect(moteSmoke, curCell.ToVector3(), Map, Rand.Range(.8f, 1.3f),
-                    180 + direction.ToAngleFlat(), Rand.Range(.4f, .6f), Rand.Range(-2, 2));
-            }
+            FleckMaker.ThrowSmoke(curCell.ToVector3(), Map, Rand.Range(.4f, .6f));
+            //var moteSmoke = ThingDef.Named("Mote_Smoke");
+            //if (Rand.Chance(.5f))
+            //{
+            //    EffectMaker.MakeEffect(moteSmoke, curCell.ToVector3(), Map, Rand.Range(.8f, 1.3f),
+            //        direction.ToAngleFlat(), Rand.Range(.4f, .6f), Rand.Range(-2, 2));
+            //}
+            //else
+            //{
+            //    EffectMaker.MakeEffect(moteSmoke, curCell.ToVector3(), Map, Rand.Range(.8f, 1.3f),
+            //        180 + direction.ToAngleFlat(), Rand.Range(.4f, .6f), Rand.Range(-2, 2));
+            //}
         }
 
         public void DoEffects(IEnumerable<IntVec3> effectRadial1)
