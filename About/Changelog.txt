@@ -1,5 +1,8 @@
 # Changelog for LordoftheRimsWizardry
 
+1.0.8.0 - Fixed the NoBeard tag for female wizards, thanks Dylan
+
+
 1.0.7.0 - Fixed the vortex and the wolf song
 
 

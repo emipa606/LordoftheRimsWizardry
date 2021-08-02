@@ -6,4 +6,10 @@
       <li>Istari</li>
     </value>
   </Operation>
+  <Operation Class="PatchOperationAdd">
+    <xpath>/Defs/BeardDef[defName = "NoBeard"]/styleTags</xpath>
+    <value>
+      <li>Istari</li>
+    </value>
+  </Operation>
 </Patch>
