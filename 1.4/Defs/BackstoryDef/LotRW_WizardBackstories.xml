@@ -1,0 +1,155 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  <AlienRace.AlienBackstoryDef Name="LotRW_BackstoryWizard" Abstract="True">
+    <bodyTypeMale>Male</bodyTypeMale>
+    <bodyTypeFemale>Female</bodyTypeFemale>
+    <spawnCategories>
+      <li>LotRW_BackstoryWizard</li>
+    </spawnCategories>
+    <forcedTraitsChance>
+      <li>
+        <defName>LotRW_Istari</defName>
+      </li>
+    </forcedTraitsChance>
+  </AlienRace.AlienBackstoryDef>
+  <AlienRace.AlienBackstoryDef ParentName="LotRW_BackstoryWizard">
+    <defName>LotRW_BackstoryWizardChildOne</defName>
+    <title>None</title>
+    <titleShort>None</titleShort>
+    <baseDesc>An Istari, also known as a wizard, is a Maiar spirit sent to earth in a human form to aid the Free Peoples against the threat of corruptive dark forces. They have no unique childhoods, as they are avatars of these spirits.</baseDesc>
+    <slot>Childhood</slot>
+  </AlienRace.AlienBackstoryDef>
+  <!-- Adult backstories -->
+  <AlienRace.AlienBackstoryDef ParentName="LotRW_BackstoryWizard">
+    <defName>LotRW_BackstoryWizardAdultOne</defName>
+    <title>Wandering wizard</title>
+    <titleShort>Wizard</titleShort>
+    <baseDesc>[PAWN_nameDef] wandered the world, seeking out ways to fulfill their Vala's requests through their adventures.</baseDesc>
+    <slot>Adulthood</slot>
+    <skillGains>
+      <li>
+        <key>Intellectual</key>
+        <value>12</value>
+      </li>
+      <li>
+        <key>Social</key>
+        <value>4</value>
+      </li>
+      <li>
+        <key>Shooting</key>
+        <value>4</value>
+      </li>
+      <li>
+        <key>Melee</key>
+        <value>4</value>
+      </li>
+    </skillGains>
+  </AlienRace.AlienBackstoryDef>
+  <AlienRace.AlienBackstoryDef ParentName="LotRW_BackstoryWizard">
+    <defName>LotRW_BackstoryWizardAdultTwo</defName>
+    <title>Tower wizard</title>
+    <titleShort>Wizard</titleShort>
+    <baseDesc>[PAWN_nameDef] fortified their position in the world by constructing a massive tower and tending to its servants. However, soaring to such great heights left [PAWN_objective] with an air of superiority that tended to upset [PAWN_possessive] servants and guests.</baseDesc>
+    <slot>Adulthood</slot>
+    <skillGains>
+      <li>
+        <key>Intellectual</key>
+        <value>15</value>
+      </li>
+      <li>
+        <key>Construction</key>
+        <value>4</value>
+      </li>
+      <li>
+        <key>Shooting</key>
+        <value>4</value>
+      </li>
+    </skillGains>
+    <forcedTraitsChance>
+      <li>
+        <defName>Industriousness</defName>
+        <degree>2</degree>
+        <chance>25</chance>
+      </li>
+      <li>
+        <defName>Abrasive</defName>
+      </li>
+    </forcedTraitsChance>
+  </AlienRace.AlienBackstoryDef>
+  <AlienRace.AlienBackstoryDef ParentName="LotRW_BackstoryWizard">
+    <defName>LotRW_BackstoryWizardAdultThree</defName>
+    <title>Woodland wizard</title>
+    <titleShort>Wizard</titleShort>
+    <baseDesc>[PAWN_nameDef] mostly kept to themselves deep in the woods. Their reclusion in the woods lent to their expertise in wildlife flora and fauna.</baseDesc>
+    <slot>Adulthood</slot>
+    <skillGains>
+      <li>
+        <key>Intellectual</key>
+        <value>12</value>
+      </li>
+      <li>
+        <key>Animals</key>
+        <value>4</value>
+      </li>
+      <li>
+        <key>Artistic</key>
+        <value>4</value>
+      </li>
+      <li>
+        <key>Plants</key>
+        <value>4</value>
+      </li>
+    </skillGains>
+    <forcedTraitsChance>
+      <li>
+        <defName>Ascetic</defName>
+      </li>
+    </forcedTraitsChance>
+  </AlienRace.AlienBackstoryDef>
+  <AlienRace.AlienBackstoryDef ParentName="LotRW_BackstoryWizard">
+    <defName>LotRW_BackstoryWizardAdultFour</defName>
+    <title>Alchemist wizard</title>
+    <titleShort>Wizard</titleShort>
+    <baseDesc>[PAWN_nameDef] sought nothing more than to attune the elements to their aid by crafting concoctions, doodads, and salves from the flora and fauna around them for various purposes.</baseDesc>
+    <slot>Adulthood</slot>
+    <skillGains>
+      <li>
+        <key>Intellectual</key>
+        <value>12</value>
+      </li>
+      <li>
+        <key>Medicine</key>
+        <value>4</value>
+      </li>
+      <li>
+        <key>Cooking</key>
+        <value>4</value>
+      </li>
+      <li>
+        <key>Crafting</key>
+        <value>4</value>
+      </li>
+    </skillGains>
+  </AlienRace.AlienBackstoryDef>
+  <AlienRace.AlienBackstoryDef ParentName="LotRW_BackstoryWizard">
+    <defName>LotRW_BackstoryWizardAdultFive</defName>
+    <title>War wizard</title>
+    <titleShort>Wizard</titleShort>
+    <baseDesc>[PAWN_nameDef] was honed for battle over the centuries in service of [PAWN_possessive] Valar.</baseDesc>
+    <slot>Adulthood</slot>
+    <skillGains>
+      <li>
+        <key>Intellectual</key>
+        <value>10</value>
+      </li>
+      <li>
+        <key>Shooting</key>
+        <value>7</value>
+      </li>
+      <li>
+        <key>Melee</key>
+        <value>7</value>
+      </li>
+    </skillGains>
+  </AlienRace.AlienBackstoryDef>
+</Defs>

@@ -1,37 +1,36 @@
 ﻿using RimWorld;
 using Verse;
 
-namespace Wizardry
+namespace Wizardry;
+
+public class ThingBook : ThingWithComps
 {
-    public class ThingBook : ThingWithComps
+    private CompArt compArt;
+
+    private CompArt CompArt
     {
-        private CompArt compArt;
-
-        private CompArt CompArt
+        get
         {
-            get
+            if (compArt == null)
             {
-                if (compArt == null)
-                {
-                    compArt = this.TryGetComp<CompArt>();
-                }
-
-                return compArt;
+                compArt = this.TryGetComp<CompArt>();
             }
+
+            return compArt;
         }
+    }
 
-        public override string Label
+    public override string Label
+    {
+        get
         {
-            get
+            if (CompArt != null)
             {
-                if (CompArt != null)
-                {
-                    return "Estate_BookTitle".Translate(CompArt.Title, CompArt.AuthorName) + " (" +
-                           base.Label + ")";
-                }
-
-                return base.Label;
+                return "Estate_BookTitle".Translate(CompArt.Title, CompArt.AuthorName) + " (" +
+                       base.Label + ")";
             }
+
+            return base.Label;
         }
     }
 }

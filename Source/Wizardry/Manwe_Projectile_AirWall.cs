@@ -6,260 +6,258 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 
-namespace Wizardry
+namespace Wizardry;
+
+[StaticConstructorOnStartup]
+public class Manwe_Projectile_AirWall : Projectile_AbilityBase
 {
-    [StaticConstructorOnStartup]
-    public class Manwe_Projectile_AirWall : Projectile_AbilityBase
+    //unsaved variables
+    private readonly int wallLengthMax = 20;
+    private int age = -1;
+    private Pawn caster;
+    private List<Thing> despawnedThingList = new List<Thing>();
+    private int duration = 300;
+    private bool initialized;
+    private bool wallActive;
+    private Vector3 wallDir;
+    private IntVec3 wallEnd;
+    private int wallLength;
+    private Vector3 wallPos;
+    private List<IntVec3> wallPositions = new List<IntVec3>();
+
+    public override void ExposeData()
     {
-        //unsaved variables
-        private readonly int wallLengthMax = 20;
-        private int age = -1;
-        private Pawn caster;
-        private List<Thing> despawnedThingList = new List<Thing>();
-        private int duration = 300;
-        private bool initialized;
-        private bool wallActive;
-        private Vector3 wallDir;
-        private IntVec3 wallEnd;
-        private int wallLength;
-        private Vector3 wallPos;
-        private List<IntVec3> wallPositions = new List<IntVec3>();
+        base.ExposeData();
+        Scribe_Values.Look(ref initialized, "initialized");
+        Scribe_Values.Look(ref wallActive, "wallActive");
+        Scribe_Values.Look(ref age, "age", -1);
+        Scribe_Values.Look(ref duration, "duration", 300);
+        Scribe_Values.Look(ref wallLength, "wallLength");
+        Scribe_Values.Look(ref wallPos, "wallPos");
+        Scribe_Values.Look(ref wallDir, "wallDir");
+        Scribe_Values.Look(ref wallEnd, "wallEnd");
+        Scribe_References.Look(ref caster, "caster");
+        Scribe_Collections.Look(ref wallPositions, "wallPositions", LookMode.Value);
+        Scribe_Collections.Look(ref despawnedThingList, "despawnedThingList", LookMode.Value);
+    }
 
-        public override void ExposeData()
+    public void BeginTargetingWithVerb(WizardAbilityDef verbToAdd, TargetingParameters targetParams,
+        Action<LocalTargetInfo> action, Pawn caster = null, Action actionWhenFinished = null,
+        Texture2D mouseAttachment = null)
+    {
+        Find.Targeter.targetingSource = null;
+        Find.Targeter.targetingSourceAdditionalPawns = null;
+        AccessTools.Field(typeof(Targeter), "action").SetValue(Find.Targeter, action);
+        AccessTools.Field(typeof(Targeter), "targetParams").SetValue(Find.Targeter, targetParams);
+        AccessTools.Field(typeof(Targeter), "caster").SetValue(Find.Targeter, caster);
+        AccessTools.Field(typeof(Targeter), "actionWhenFinished").SetValue(Find.Targeter, actionWhenFinished);
+        AccessTools.Field(typeof(Targeter), "mouseAttachment").SetValue(Find.Targeter, mouseAttachment);
+    }
+
+    private void GetSecondTarget()
+    {
+        Find.Targeter.StopTargeting();
+        BeginTargetingWithVerb(WizardryDefOf.CompVerb, WizardryDefOf.CompVerb.MainVerb.targetParams,
+            delegate(LocalTargetInfo info)
+            {
+                var comp = caster.GetComp<CompWizardry>();
+                comp.SecondTarget = info;
+            }, caster);
+    }
+
+    protected override void Impact(Thing hitThing, bool blockedByShield = false)
+    {
+        var unused = Map;
+        base.Impact(hitThing, blockedByShield);
+        var unused1 = def;
+        if (!initialized)
         {
-            base.ExposeData();
-            Scribe_Values.Look(ref initialized, "initialized");
-            Scribe_Values.Look(ref wallActive, "wallActive");
-            Scribe_Values.Look(ref age, "age", -1);
-            Scribe_Values.Look(ref duration, "duration", 300);
-            Scribe_Values.Look(ref wallLength, "wallLength");
-            Scribe_Values.Look(ref wallPos, "wallPos");
-            Scribe_Values.Look(ref wallDir, "wallDir");
-            Scribe_Values.Look(ref wallEnd, "wallEnd");
-            Scribe_References.Look(ref caster, "caster");
-            Scribe_Collections.Look(ref wallPositions, "wallPositions", LookMode.Value);
-            Scribe_Collections.Look(ref despawnedThingList, "despawnedThingList", LookMode.Value);
+            caster = launcher as Pawn;
+            GetSecondTarget();
+            initialized = true;
         }
 
-        public void BeginTargetingWithVerb(WizardAbilityDef verbToAdd, TargetingParameters targetParams,
-            Action<LocalTargetInfo> action, Pawn caster = null, Action actionWhenFinished = null,
-            Texture2D mouseAttachment = null)
+        var comp = caster?.GetComp<CompWizardry>();
+        if (comp != null && !wallActive && comp.SecondTarget != null)
         {
-            Find.Targeter.targetingSource = null;
-            Find.Targeter.targetingSourceAdditionalPawns = null;
-            AccessTools.Field(typeof(Targeter), "action").SetValue(Find.Targeter, action);
-            AccessTools.Field(typeof(Targeter), "targetParams").SetValue(Find.Targeter, targetParams);
-            AccessTools.Field(typeof(Targeter), "caster").SetValue(Find.Targeter, caster);
-            AccessTools.Field(typeof(Targeter), "actionWhenFinished").SetValue(Find.Targeter, actionWhenFinished);
-            AccessTools.Field(typeof(Targeter), "mouseAttachment").SetValue(Find.Targeter, mouseAttachment);
+            age = 0;
+            duration = 1200;
+            wallActive = true;
+            wallPos = Position.ToVector3Shifted();
+            wallDir = GetVector(Position.ToVector3Shifted(), comp.SecondTarget.Cell.ToVector3Shifted());
+            wallEnd = comp.SecondTarget.Cell;
+            comp.SecondTarget = null;
         }
 
-        private void GetSecondTarget()
+        if (!wallActive)
         {
-            Find.Targeter.StopTargeting();
-            BeginTargetingWithVerb(WizardryDefOf.CompVerb, WizardryDefOf.CompVerb.MainVerb.targetParams,
-                delegate(LocalTargetInfo info)
-                {
-                    var comp = caster.GetComp<CompWizardry>();
-                    comp.SecondTarget = info;
-                }, caster);
+            if (Find.TickManager.TicksGame % 6 == 0)
+            {
+                FleckMaker.ThrowDustPuff(Position, caster.Map, Rand.Range(.6f, .9f));
+            }
         }
-
-        protected override void Impact(Thing hitThing)
+        else
         {
-            var unused = Map;
-            base.Impact(hitThing);
-            var unused1 = def;
-            if (!initialized)
+            if (Find.TickManager.TicksGame % 3 != 0)
             {
-                caster = launcher as Pawn;
-                GetSecondTarget();
-                initialized = true;
+                return;
             }
 
-            var comp = caster.GetComp<CompWizardry>();
-            if (!wallActive && comp.SecondTarget != null)
+            if (wallLength < wallLengthMax)
             {
-                age = 0;
-                duration = 1200;
-                wallActive = true;
-                wallPos = Position.ToVector3Shifted();
-                wallDir = GetVector(Position.ToVector3Shifted(), comp.SecondTarget.Cell.ToVector3Shifted());
-                wallEnd = comp.SecondTarget.Cell;
-                comp.SecondTarget = null;
-            }
-
-            if (!wallActive)
-            {
-                if (Find.TickManager.TicksGame % 6 == 0)
+                var cellList = wallPos.ToIntVec3().GetThingList(caster.Map);
+                var hasWall = false;
+                foreach (var thing in cellList)
                 {
-                    FleckMaker.ThrowDustPuff(Position, caster.Map, Rand.Range(.6f, .9f));
-                }
-            }
-            else
-            {
-                if (Find.TickManager.TicksGame % 3 != 0)
-                {
-                    return;
+                    if (thing.def.defName == "LotRW_WindWall")
+                    {
+                        hasWall = true;
+                    }
                 }
 
-                if (wallLength < wallLengthMax)
+                if (!hasWall)
                 {
-                    var cellList = wallPos.ToIntVec3().GetThingList(caster.Map);
-                    var hasWall = false;
+                    var spawnWall = true;
                     foreach (var thing in cellList)
                     {
-                        if (thing.def.defName == "LotRW_WindWall")
+                        if (!thing.def.EverHaulable)
                         {
-                            hasWall = true;
-                        }
-                    }
-
-                    if (!hasWall)
-                    {
-                        var spawnWall = true;
-                        foreach (var thing in cellList)
-                        {
-                            if (!thing.def.EverHaulable)
+                            if (thing.def.altitudeLayer is AltitudeLayer.Building
+                                or AltitudeLayer.Item or AltitudeLayer.ItemImportant)
                             {
-                                if (thing.def.altitudeLayer == AltitudeLayer.Building ||
-                                    thing.def.altitudeLayer == AltitudeLayer.Item ||
-                                    thing.def.altitudeLayer == AltitudeLayer.ItemImportant)
-                                {
-                                    //Log.Message("bypassing object and setting wall spawn to false");
-                                    spawnWall = false;
-                                }
-                                else
-                                {
-                                    if (thing.def.defName.Contains("Mote") ||
-                                        thing.def.defName == "LotRW_Projectile_AirWall")
-                                    {
-                                        //Log.Message("avoided storing " + cellList[i].def.defName);
-                                    }
-                                    else
-                                    {
-                                        despawnedThingList.Add(thing);
-                                        thing.DeSpawn();
-                                    }
-                                }
+                                //Log.Message("bypassing object and setting wall spawn to false");
+                                spawnWall = false;
                             }
                             else
                             {
-                                var launchDir = -90;
-                                if (Rand.Chance(.5f))
+                                if (thing.def.defName.Contains("Mote") ||
+                                    thing.def.defName == "LotRW_Projectile_AirWall")
                                 {
-                                    launchDir = 90;
+                                    //Log.Message("avoided storing " + cellList[i].def.defName);
                                 }
-
-                                LaunchFlyingObect(
-                                    thing.Position + (Quaternion.AngleAxis(launchDir, Vector3.up) * wallDir)
-                                    .ToIntVec3(), thing);
+                                else
+                                {
+                                    despawnedThingList.Add(thing);
+                                    thing.DeSpawn();
+                                }
                             }
                         }
-
-                        if (spawnWall)
+                        else
                         {
-                            var tempSpawn = new SpawnThings
+                            var launchDir = -90;
+                            if (Rand.Chance(.5f))
                             {
-                                def = ThingDef.Named("LotRW_WindWall"),
-                                spawnCount = 1
-                            };
-                            SingleSpawnLoop(tempSpawn, wallPos.ToIntVec3(), caster.Map);
-                            wallLength++;
-                            wallPositions.Add(wallPos.ToIntVec3());
+                                launchDir = 90;
+                            }
+
+                            LaunchFlyingObect(
+                                thing.Position + (Quaternion.AngleAxis(launchDir, Vector3.up) * wallDir)
+                                .ToIntVec3(), thing);
                         }
                     }
 
-                    wallPos += wallDir;
-
-                    if (!wallPos.ToIntVec3().Walkable(caster.Map) || wallPos.ToIntVec3() == wallEnd)
+                    if (spawnWall)
                     {
-                        wallPos -= wallDir;
-                        wallLength = wallLengthMax;
+                        var tempSpawn = new SpawnThings
+                        {
+                            def = ThingDef.Named("LotRW_WindWall"),
+                            spawnCount = 1
+                        };
+                        SingleSpawnLoop(tempSpawn, wallPos.ToIntVec3(), caster.Map);
+                        wallLength++;
+                        wallPositions.Add(wallPos.ToIntVec3());
                     }
                 }
 
-                for (var j = 0; j < wallPositions.Count; j++)
+                wallPos += wallDir;
+
+                if (!wallPos.ToIntVec3().Walkable(caster.Map) || wallPos.ToIntVec3() == wallEnd)
                 {
-                    var launchDir = Rand.Range(-100, -80);
-                    if (Rand.Chance(.5f))
-                    {
-                        launchDir = Rand.Range(80, 100);
-                    }
-
-                    EffectMaker.MakeEffect(ThingDef.Named("Mote_DustPuff"),
-                        wallPositions.RandomElement().ToVector3Shifted(), caster.Map, Rand.Range(.6f, .8f),
-                        (Quaternion.AngleAxis(launchDir, Vector3.up) * wallDir).ToAngleFlat(), Rand.Range(2f, 5f),
-                        Rand.Range(100, 200), .04f, .03f, .8f, false);
+                    wallPos -= wallDir;
+                    wallLength = wallLengthMax;
                 }
             }
-        }
 
-        public void LaunchFlyingObect(IntVec3 targetCell, Thing thing)
+            for (var j = 0; j < wallPositions.Count; j++)
+            {
+                var launchDir = Rand.Range(-100, -80);
+                if (Rand.Chance(.5f))
+                {
+                    launchDir = Rand.Range(80, 100);
+                }
+
+                EffectMaker.MakeEffect(ThingDef.Named("Mote_DustPuff"),
+                    wallPositions.RandomElement().ToVector3Shifted(), caster.Map, Rand.Range(.6f, .8f),
+                    (Quaternion.AngleAxis(launchDir, Vector3.up) * wallDir).ToAngleFlat(), Rand.Range(2f, 5f),
+                    Rand.Range(100, 200), .04f, .03f, .8f, false);
+            }
+        }
+    }
+
+    public void LaunchFlyingObect(IntVec3 targetCell, Thing thing)
+    {
+        if (targetCell == default)
         {
-            if (targetCell == default)
-            {
-                return;
-            }
-
-            if (thing == null || !thing.Position.IsValid || Destroyed || !thing.Spawned || thing.Map == null)
-            {
-                return;
-            }
-
-            var flyingObject = (FlyingObject_Spinning) GenSpawn.Spawn(ThingDef.Named("FlyingObject_Spinning"),
-                thing.Position, thing.Map);
-            flyingObject.speed = 22;
-            flyingObject.Launch(caster, targetCell, thing);
+            return;
         }
 
-        public void SingleSpawnLoop(SpawnThings spawnables, IntVec3 position, Map map)
+        if (thing is not { Position.IsValid: true } || Destroyed || !thing.Spawned || thing.Map == null)
         {
-            if (spawnables.def == null)
-            {
-                return;
-            }
-
-            var unused = caster.Faction;
-            var spawnablesDef = spawnables.def;
-            ThingDef stuff = null;
-            var madeFromStuff = spawnablesDef.MadeFromStuff;
-            if (madeFromStuff)
-            {
-                stuff = ThingDefOf.BlocksGranite;
-            }
-
-            var thing = ThingMaker.MakeThing(spawnablesDef, stuff);
-            GenSpawn.Spawn(thing, position, map, Rot4.North);
+            return;
         }
 
-        public Vector3 GetVector(Vector3 casterPos, Vector3 targetPos)
+        var flyingObject = (FlyingObject_Spinning)GenSpawn.Spawn(ThingDef.Named("FlyingObject_Spinning"),
+            thing.Position, thing.Map);
+        flyingObject.speed = 22;
+        flyingObject.Launch(caster, targetCell, thing);
+    }
+
+    public void SingleSpawnLoop(SpawnThings spawnables, IntVec3 position, Map map)
+    {
+        if (spawnables.def == null)
         {
-            var heading = targetPos - casterPos;
-            var distance = heading.magnitude;
-            var direction = heading / distance;
-            return direction;
+            return;
         }
 
-        public override void Tick()
+        var unused = caster.Faction;
+        var spawnablesDef = spawnables.def;
+        ThingDef stuff = null;
+        var madeFromStuff = spawnablesDef.MadeFromStuff;
+        if (madeFromStuff)
         {
-            base.Tick();
-            age++;
+            stuff = ThingDefOf.BlocksGranite;
         }
 
-        public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
+        var thing = ThingMaker.MakeThing(spawnablesDef, stuff);
+        GenSpawn.Spawn(thing, position, map, Rot4.North);
+    }
+
+    public Vector3 GetVector(Vector3 casterPos, Vector3 targetPos)
+    {
+        var heading = targetPos - casterPos;
+        var distance = heading.magnitude;
+        var direction = heading / distance;
+        return direction;
+    }
+
+    public override void Tick()
+    {
+        base.Tick();
+        age++;
+    }
+
+    public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
+    {
+        if (age <= duration)
         {
-            if (age <= duration)
-            {
-                return;
-            }
-
-            foreach (var newThing in despawnedThingList)
-            {
-                GenSpawn.Spawn(newThing, newThing.Position, Map);
-            }
-
-            base.Destroy(mode);
+            return;
         }
+
+        foreach (var newThing in despawnedThingList)
+        {
+            GenSpawn.Spawn(newThing, newThing.Position, Map);
+        }
+
+        base.Destroy(mode);
     }
 }

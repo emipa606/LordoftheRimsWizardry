@@ -1,11 +1,10 @@
 ﻿using UnityEngine;
 using Verse;
 
-namespace Wizardry
+namespace Wizardry;
+
+[StaticConstructorOnStartup]
+public static class MatPool
 {
-    [StaticConstructorOnStartup]
-    public static class MatPool
-    {
-        public static readonly Material rendEarthMat7 = MaterialPool.MatFrom("Meshes/EarthQuake7", true);
-    }
+    public static readonly Material rendEarthMat7 = MaterialPool.MatFrom("Meshes/EarthQuake7", true);
 }

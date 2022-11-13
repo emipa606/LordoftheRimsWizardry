@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  <FactionDef Abstract="True" Name="WizardFactionBase" ParentName="FactionBase">
+    <settlementTexturePath>World/WorldObjects/DefaultFactionBase</settlementTexturePath>
+    <colorSpectrum>
+      <li>(1, 1, 1)</li>
+    </colorSpectrum>
+    <allowedCultures>
+      <li>Corunan</li>
+    </allowedCultures>
+  </FactionDef>
+  <FactionDef ParentName="WizardFactionBase">
+    <defName>WizardPlayerFaction</defName>
+    <label>One Wizard</label>
+    <description>Your own faction.</description>
+    <isPlayer>true</isPlayer>
+    <pawnsPlural>wizards</pawnsPlural>
+    <basicMemberKind>LotRW_WizardColonist</basicMemberKind>
+    <techLevel>Neolithic</techLevel>
+    <backstoryCategories>
+      <li>LotRW_BackstoryWizard</li>
+    </backstoryCategories>
+    <factionIconPath>World/WorldObjects/Expanding/Village</factionIconPath>
+    <settlementTexturePath>World/WorldObjects/TribalSettlement</settlementTexturePath>
+    <playerInitialSettlementNameMaker>NamerInitialSettlementColony</playerInitialSettlementNameMaker>
+    <factionNameMaker>NamerFactionOutlander</factionNameMaker>
+    <settlementNameMaker>NamerSettlementOutlander</settlementNameMaker>
+    <startingResearchTags>
+      <li>TribalStart</li>
+    </startingResearchTags>
+    <raidLootValueFromPointsCurve>
+      <points>
+        <li>(35,     15)</li>
+        <li>(100,   120)</li>
+        <li>(1000,  500)</li>
+        <li>(2000,  800)</li>
+        <li>(4000, 1000)</li>
+      </points>
+    </raidLootValueFromPointsCurve>
+  </FactionDef>
+</Defs>

@@ -1,28 +1,17 @@
 ﻿using RimWorld;
 using Verse;
 
-namespace Wizardry
+namespace Wizardry;
+
+public static class UtilityWizardry
 {
-    public static class UtilityWizardry
+    public static bool IsIstari(this Pawn pawn)
     {
-        public static bool IsIstari(this Pawn pawn)
-        {
-            if (pawn?.story?.traits?.HasTrait(TraitDef.Named("LotRW_Istari")) ?? false)
-            {
-                return true;
-            }
+        return pawn?.story?.traits?.HasTrait(TraitDef.Named("LotRW_Istari")) ?? false;
+    }
 
-            return false;
-        }
-
-        public static bool IsMage(this Pawn pawn)
-        {
-            if (pawn?.story?.traits?.HasTrait(TraitDef.Named("LotRW_MagicAttuned")) ?? false)
-            {
-                return true;
-            }
-
-            return false;
-        }
+    public static bool IsMage(this Pawn pawn)
+    {
+        return pawn?.story?.traits?.HasTrait(TraitDef.Named("LotRW_MagicAttuned")) ?? false;
     }
 }

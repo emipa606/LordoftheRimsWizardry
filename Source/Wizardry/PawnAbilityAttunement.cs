@@ -2,86 +2,85 @@
 using AbilityUser;
 using Verse;
 
-namespace Wizardry
+namespace Wizardry;
+
+public class PawnAbilityAttunement : PawnAbility
 {
-    public class PawnAbilityAttunement : PawnAbility
+    public PawnAbilityAttunement()
     {
-        public PawnAbilityAttunement()
+    }
+
+    public PawnAbilityAttunement(CompAbilityUser abilityUser) : base(abilityUser)
+    {
+        this.abilityUser = abilityUser as CompWizardry;
+    }
+
+    public PawnAbilityAttunement(Pawn user, AbilityDef pdef) : base(user, pdef)
+    {
+    }
+
+    public PawnAbilityAttunement(AbilityData data) : base(data)
+    {
+    }
+
+    public CompWizardry Wizard => Pawn.GetComp<CompWizardry>();
+
+    public WizardAbilityDef AbilityDef => Def as WizardAbilityDef;
+
+    public override string PostAbilityVerbCompDesc(VerbProperties_Ability verbDef)
+    {
+        var text = "";
+        string result;
+        if (verbDef == null)
         {
+            result = text;
         }
-
-        public PawnAbilityAttunement(CompAbilityUser abilityUser) : base(abilityUser)
+        else
         {
-            this.abilityUser = abilityUser as CompWizardry;
-        }
-
-        public PawnAbilityAttunement(Pawn user, AbilityDef pdef) : base(user, pdef)
-        {
-        }
-
-        public PawnAbilityAttunement(AbilityData data) : base(data)
-        {
-        }
-
-        public CompWizardry Wizard => Pawn.GetComp<CompWizardry>();
-
-        public WizardAbilityDef AbilityDef => Def as WizardAbilityDef;
-
-        public override string PostAbilityVerbCompDesc(VerbProperties_Ability verbDef)
-        {
-            var text = "";
-            string result;
-            if (verbDef == null)
+            if ((_ = verbDef.abilityDef as WizardAbilityDef) != null)
             {
-                result = text;
-            }
-            else
-            {
-                if ((_ = verbDef.abilityDef as WizardAbilityDef) != null)
-                {
-                    var stringBuilder = new StringBuilder();
-                    text = stringBuilder.ToString();
-                }
-
-                result = text;
+                var stringBuilder = new StringBuilder();
+                text = stringBuilder.ToString();
             }
 
-            return result;
+            result = text;
         }
 
-        public override bool ShouldShowGizmo()
-        {
-            return true;
-        }
+        return result;
+    }
 
-        public override void Notify_AbilityFailed(bool refund)
+    public override bool ShouldShowGizmo()
+    {
+        return true;
+    }
+
+    public override void Notify_AbilityFailed(bool refund)
+    {
+        base.Notify_AbilityFailed(refund);
+        if (refund)
         {
-            base.Notify_AbilityFailed(refund);
-            if (refund)
+        }
+    }
+
+    public override bool CanCastPowerCheck(AbilityContext context, out string reason)
+    {
+        var canCastPowerCheck = base.CanCastPowerCheck(context, out reason);
+        bool result;
+        if (canCastPowerCheck)
+        {
+            reason = "";
+            var b = Def != null && (_ = Def as WizardAbilityDef) != null;
+            if (b)
             {
             }
-        }
 
-        public override bool CanCastPowerCheck(AbilityContext context, out string reason)
+            result = true;
+        }
+        else
         {
-            var flag = base.CanCastPowerCheck(context, out reason);
-            bool result;
-            if (flag)
-            {
-                reason = "";
-                var flag2 = Def != null && (_ = Def as WizardAbilityDef) != null;
-                if (flag2)
-                {
-                }
-
-                result = true;
-            }
-            else
-            {
-                result = false;
-            }
-
-            return result;
+            result = false;
         }
+
+        return result;
     }
 }

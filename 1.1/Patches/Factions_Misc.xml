@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Patch>
   <!-- ========== Change tribal label ========== -->
-  <Operation Class="PatchOperationAdd">
+  <Operation Class="PatchOperationAdd" MayRequire="Ludeon.Rimworld.Royalty">
     <xpath>Defs/FactionDef[defName="Empire"]/permanentEnemyToEveryoneExcept</xpath>
     <value>
       <li>WizardPlayerFaction</li>

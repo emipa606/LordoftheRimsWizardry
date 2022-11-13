@@ -1,12 +1,11 @@
 ﻿using Verse;
 
-namespace Wizardry
+namespace Wizardry;
+
+public class RoomRoleWorker_WizardLibrary : RoomRoleWorker
 {
-    public class RoomRoleWorker_WizardLibrary : RoomRoleWorker
+    public override float GetScore(Room room)
     {
-        public override float GetScore(Room room)
-        {
-            return 0f;
-        }
+        return 0f;
     }
 }

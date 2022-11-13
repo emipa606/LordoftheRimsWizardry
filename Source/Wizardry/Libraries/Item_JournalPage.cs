@@ -4,82 +4,81 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 
-namespace Wizardry
+namespace Wizardry;
+
+public class Item_JournalPage : ThingWithComps
 {
-    public class Item_JournalPage : ThingWithComps
+    private CompArt artComp;
+    private bool IsBook;
+    private Pawn owner;
+    private bool saveOwner;
+
+    public override void SpawnSetup(Map map, bool bla)
     {
-        private CompArt artComp;
-        private bool IsBook;
-        private Pawn owner;
-        private bool saveOwner;
+        base.SpawnSetup(map, bla);
+        artComp = GetComp<CompArt>();
+        ResolveOwner();
+    }
 
-        public override void SpawnSetup(Map map, bool bla)
+    public void ResolveOwner()
+    {
+        if (artComp == null)
         {
-            base.SpawnSetup(map, bla);
-            artComp = GetComp<CompArt>();
-            ResolveOwner();
+            return;
         }
 
-        public void ResolveOwner()
+        foreach (var colonist in Map.mapPawns.FreeColonistsSpawned)
         {
-            if (artComp == null)
+            if (colonist.Name.ToStringFull != artComp.AuthorName)
             {
-                return;
+                continue;
             }
 
-            foreach (var colonist in Map.mapPawns.FreeColonistsSpawned)
-            {
-                if (colonist.Name.ToStringFull != artComp.AuthorName)
-                {
-                    continue;
-                }
+            owner = colonist;
+            saveOwner = true;
+            break;
+        }
+    }
 
-                owner = colonist;
-                saveOwner = true;
-                break;
-            }
+    public void ClaimJournal(Pawn claimant)
+    {
+        if (claimant != null && owner == null)
+        {
+            owner = claimant;
+        }
+    }
+
+    public override void ExposeData()
+    {
+        base.ExposeData();
+        // Save and load the work variables, so they don't default after loading
+
+        Scribe_Values.Look(ref IsBook, "IsBook");
+        Scribe_Values.Look(ref saveOwner, "saveOwner");
+        if (saveOwner)
+        {
+            Scribe_References.Look(ref owner, "owner");
+        }
+    }
+
+
+    [DebuggerHidden]
+    public override IEnumerable<Gizmo> GetGizmos()
+    {
+        using var enumerator = base.GetGizmos().GetEnumerator();
+        while (enumerator.MoveNext())
+        {
+            var current = enumerator.Current;
+            yield return current;
         }
 
-        public void ClaimJournal(Pawn claimant)
+        yield return new Command_Action
         {
-            if (claimant != null && owner == null)
-            {
-                owner = claimant;
-            }
-        }
-
-        public override void ExposeData()
-        {
-            base.ExposeData();
-            // Save and load the work variables, so they don't default after loading
-
-            Scribe_Values.Look(ref IsBook, "IsBook");
-            Scribe_Values.Look(ref saveOwner, "saveOwner");
-            if (saveOwner)
-            {
-                Scribe_References.Look(ref owner, "owner");
-            }
-        }
-
-
-        [DebuggerHidden]
-        public override IEnumerable<Gizmo> GetGizmos()
-        {
-            using var enumerator = base.GetGizmos().GetEnumerator();
-            while (enumerator.MoveNext())
-            {
-                var current = enumerator.Current;
-                yield return current;
-            }
-
-            yield return new Command_Action
-            {
-                defaultLabel = "Discard",
-                icon = ContentFinder<Texture2D>.Get("UI/Commands/Detonate"),
-                defaultDesc = "Disposes of unwanted journal pages.",
-                action = delegate { DeSpawn(); },
-                hotKey = KeyBindingDefOf.Misc3
-            };
-        }
+            defaultLabel = "Discard",
+            icon = ContentFinder<Texture2D>.Get("UI/Commands/Detonate"),
+            defaultDesc = "Disposes of unwanted journal pages.",
+            action = delegate { DeSpawn(); },
+            hotKey = KeyBindingDefOf.Misc3
+        };
     }
 }

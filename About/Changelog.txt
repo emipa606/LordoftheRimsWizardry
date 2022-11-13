@@ -1,5 +1,9 @@
 # Changelog for LordoftheRimsWizardry
 
+1.4.1 - Mod updated for 1.4 and passed autotests.
+Used DeepL to update translations for ChineseSimplified, French, German, Russian
+
+
 1.0.8.0 - Fixed the NoBeard tag for female wizards, thanks Dylan
 
 

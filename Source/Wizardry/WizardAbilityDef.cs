@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using AbilityUser;
 
-namespace Wizardry
+namespace Wizardry;
+
+public class WizardAbilityDef : AbilityDef
 {
-    public class WizardAbilityDef : AbilityDef
-    {
-        public List<string> tags;
-    }
+    public List<string> tags;
 }
