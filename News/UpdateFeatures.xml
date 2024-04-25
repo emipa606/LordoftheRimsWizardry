@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+	<HugsLib.UpdateFeatureDef Abstract="true" Name="LordoftheRimsWizardry_UpdateFeatureBase">
+		<modNameReadable>LordoftheRimsWizardry</modNameReadable>
+		<linkUrl>https://steamcommunity.com/sharedfiles/filedetails/?id=2245502655</linkUrl>
+	</HugsLib.UpdateFeatureDef>
+	<HugsLib.UpdateFeatureDef ParentName="LordoftheRimsWizardry_UpdateFeatureBase">
+		<defName>LordoftheRimsWizardry_1_4_1</defName>
+		<assemblyVersion>1.4.1</assemblyVersion>
+		<content>Due to a bad interaction with the developer of the HAR framework combined with the increased work required I have decided to not further update this mod. It will stay up to support the previous versions of the game.</content>
+	</HugsLib.UpdateFeatureDef>
+</Defs>
+
